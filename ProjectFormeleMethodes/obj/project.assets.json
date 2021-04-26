@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\Studie\\Periode 3.4\\Formele Methode\\ProjectFormeleMethodes\\ProjectFormeleMethodes\\ProjectFormeleMethodes.csproj",
+      "projectUniqueName": "E:\\Studie\\Periode 3.4\\Formele Methode\\Formele-methode\\ProjectFormeleMethodes\\ProjectFormeleMethodes.csproj",
       "projectName": "ProjectFormeleMethodes",
-      "projectPath": "E:\\Studie\\Periode 3.4\\Formele Methode\\ProjectFormeleMethodes\\ProjectFormeleMethodes\\ProjectFormeleMethodes.csproj",
+      "projectPath": "E:\\Studie\\Periode 3.4\\Formele Methode\\Formele-methode\\ProjectFormeleMethodes\\ProjectFormeleMethodes.csproj",
       "packagesPath": "C:\\Users\\finni\\.nuget\\packages\\",
-      "outputPath": "E:\\Studie\\Periode 3.4\\Formele Methode\\ProjectFormeleMethodes\\ProjectFormeleMethodes\\obj\\",
+      "outputPath": "E:\\Studie\\Periode 3.4\\Formele Methode\\Formele-methode\\ProjectFormeleMethodes\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

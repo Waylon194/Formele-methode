@@ -1,10 +1,14 @@
 ﻿using System;
 
+// Our own usables
+using ProjectFormeleMethodes.DFA;
+using ProjectFormeleMethodes.RegExpressions;
+
 namespace ProjectFormeleMethodes
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
         }
