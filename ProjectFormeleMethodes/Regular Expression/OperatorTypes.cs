@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectFormeleMethodes.DFA
+namespace ProjectFormeleMethodes
 {
-    public class DFAEngine
+    public enum OperatorTypes
     {
+        PLUS, STAR, OR, DOT, ONCE
     }
 }
