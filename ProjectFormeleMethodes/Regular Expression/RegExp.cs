@@ -16,6 +16,7 @@ namespace ProjectFormeleMethodes.Regular_Expression
 
         public RegExp left;
         public RegExp right;
+        public SortedSet<string> curLang;
 
         public int Compare(string s1, string s2)
         {
@@ -83,7 +84,7 @@ namespace ProjectFormeleMethodes.Regular_Expression
         }
 
         // getLanguages
-        public SortedSet<String> getLanguage(int maxSteps)
+        public SortedSet<string> getLanguage(int maxSteps)
         {
             SortedSet<string> emptyLanguage = new SortedSet<string>(this);
             SortedSet<string> languageResult = new SortedSet<string>(this);
@@ -99,15 +100,14 @@ namespace ProjectFormeleMethodes.Regular_Expression
 
             case OperatorTypes.ONCE:
                 languageResult.Add(this.Terminals);
-
                     break;
 
             case OperatorTypes.OR:
                 languageLeft = left == null ? emptyLanguage : left.getLanguage(maxSteps - 1);
                 languageRight = right == null ? emptyLanguage : right.getLanguage(maxSteps - 1);
 
-                languageResult.Union(languageLeft);
-                languageResult.Union(languageRight);
+                languageResult.UnionWith(languageLeft);
+                languageResult.UnionWith(languageRight);
                     break;                
 
             case OperatorTypes.DOT:
@@ -122,7 +122,7 @@ namespace ProjectFormeleMethodes.Regular_Expression
             case OperatorTypes.STAR:
             case OperatorTypes.PLUS:
                 languageLeft = left == null ? emptyLanguage : left.getLanguage(maxSteps - 1);
-                languageResult.Union(languageLeft);
+                languageResult.UnionWith(languageLeft);
                 for (int i = 1; i < maxSteps; i++)
                 {
                     HashSet<string> languageTemp = new HashSet<string>(languageResult);
