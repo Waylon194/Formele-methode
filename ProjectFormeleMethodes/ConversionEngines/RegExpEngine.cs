@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectFormeleMethodes.RegExpressions
+namespace ProjectFormeleMethodes.ConversionEngines
 {
-    public class RegularExpressionEngine
+    public class RegExpEngine
     {
         
     }
