@@ -2,3 +2,13 @@
 .vs/
 
 ProjectFormeleMethodes/obj/
+
+ProjectFormeleMethodes/bin/Debug/net5.0/ref/ProjectFormeleMethodes.dll
+
+ProjectFormeleMethodes/bin/Debug/net5.0/ProjectFormeleMethodes.runtimeconfig.dev.json
+
+*.pdb
+
+ProjectFormeleMethodes/bin/Debug/net5.0/ProjectFormeleMethodes.dll
+
+ProjectFormeleMethodes/bin/Debug/net5.0/ProjectFormeleMethodes
