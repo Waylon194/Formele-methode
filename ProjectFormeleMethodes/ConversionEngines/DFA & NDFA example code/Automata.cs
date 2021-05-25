@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ProjectFormeleMethodes.NDFA.Transitions;
+using System.Linq;
 
 /// <summary>
 /// The class Automata represents both DFA and NDFA: some NDFA's are also DFA
@@ -14,101 +15,71 @@ using ProjectFormeleMethodes.NDFA.Transitions;
 /// </summary>
 
 namespace ProjectFormeleMethodes.NDFA
+public class Automata<T> where T : IComparable
 {
+	public ISet<Transition<T>> Transitions { get; }
+	public SortedSet<T> States { get; }
+	public SortedSet<T> StartStates { get; set; }
+	public SortedSet<T> FinalStates { get; set; }
+	public SortedSet<char> Symbols { get; set; }
 
-    public class Automata<T> where T : IComparable
+	public Automata() : this(new SortedSet<char>())
+	{
+	}
+
+	public Automata(char[] s) : this(new SortedSet<char>(s))
+	{
+	}
+
+	public Automata(SortedSet<char> symbols)
+	{
+		Transitions = new SortedSet<Transition<T>>();
+		States = new SortedSet<T>();
+		StartStates = new SortedSet<T>();
+		FinalStates = new SortedSet<T>();
+		Symbols = symbols;
+	}
+
+	public void AddTransition(Transition<T> t)
+	{
+		Transitions.Add(t);
+		States.Add(t.FromState);
+		States.Add(t.ToState);
+	}
+
+	public void DefineAsStartState(T t)
+	{
+		if (!States.Contains(t))
+		{
+			States.Add(t);
+		}
+		StartStates.Add(t);
+	}
+
+	public void DefineAsFinalState(T t)
+	{
+		if (!States.Contains(t))
+		{
+			States.Add(t);
+		}
+		FinalStates.Add(t);
+	}
+
+	public List<Transition<T>> GetToStates(T state, char symbol)
+	{
+		return Transitions.Where(e => e.Symbol == symbol).Where(e => e.FromState.Equals(state)).ToList();
+	}
+
+	public bool IsDfa()
     {
-        // Or use a Map structure
-        private ISet<Transition<T>> transitions;
-        private SortedSet<T> states;
-        private SortedSet<T> startStates;
-        private SortedSet<T> finalStates;
-        private SortedSet<char> symbols;
-
-        public Automata() : this(new SortedSet<char>())
+        bool isDfa = !(Transitions.Where(e => e.Symbol.Equals('$')).ToList().Count > 0);
+        foreach (T state in States)
         {
-
-        }
-
-        public Automata(char?[] s) : this(new SortedSet<char>(Arrays.asList(s)))
-        {
-
-        }
-
-        public Automata(SortedSet<char> symbols)
-        {
-            transitions = new SortedSet<Transition<T>>();
-            states = new SortedSet<T>();
-            startStates = new SortedSet<T>();
-            finalStates = new SortedSet<T>();
-            this.setAlphabet(symbols);
-        }
-
-        public virtual char?[] Alphabet
-        {
-            set
+            foreach (char symbol in Symbols)
             {
-                this.setAlphabet(new SortedSet<char>(Arrays.asList(value)));
-            }
-            get
-            {
-                return symbols;
+                isDfa = isDfa && GetToStates(state, symbol).Count <= 1;
             }
         }
-
-        public virtual SortedSet<char> Alphabet
-        {
-            set
-            {
-                this.symbols = value;
-            }
-        }
-
-        public virtual void addTransition(Transition<T> t)
-        {
-            transitions.Add(t);
-            states.Add(t.FromState);
-            states.Add(t.ToState);
-        }
-
-        public virtual void defineAsStartState(T t)
-        {
-            // if already in states no problem because a Set will remove duplicates.
-            states.Add(t);
-            startStates.Add(t);
-        }
-
-        public virtual void defineAsFinalState(T t)
-        {
-            // if already in states no problem because a Set will remove duplicates.
-            states.Add(t);
-            finalStates.Add(t);
-        }
-
-        public virtual void printTransitions()
-        {
-            foreach (Transition<T> t in transitions)
-            {
-                Console.WriteLine(t);
-            }
-        }
-
-        public virtual bool DFA
-        {
-            get
-            {
-                bool isDFA = true;
-
-                foreach (T from in states)
-                {
-                    foreach (char symbol in symbols)
-                    {
-                        isDFA = isDFA && getToStates(from, symbol).size() == 1;
-                    }
-                }
-
-                return isDFA;
-            }
-        }
+        return isDfa;
     }
 }
