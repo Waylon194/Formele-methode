@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace ProjectFormeleMethodes.NDFA
 {
-    public class Automata<T> where T : IComparable 
+    public class Automata<T> where T : IComparable
     {
         public ISet<Transition<T>> Transitions { get; }
         public SortedSet<T> States { get; }
@@ -83,16 +83,16 @@ namespace ProjectFormeleMethodes.NDFA
             }
             return isDfa;
         }
-    }
 
-	public List<Transition<T>> GetTransition(T state)
-	{
-		List<Transition<T>> transitions = Transitions.Where(e => e.FromState.Equals(state)).ToList();
-		List<T> epsilonStates = transitions.Where(e => e.Symbol == '$').Select(e => e.ToState).ToList();
-		foreach (T epsilonState in epsilonStates)
-		{
-			transitions.AddRange(GetTransition(epsilonState));
-		}
-		return transitions;
-	}
+        public List<Transition<T>> GetTransition(T state)
+        {
+            List<Transition<T>> transitions = Transitions.Where(e => e.FromState.Equals(state)).ToList();
+            List<T> epsilonStates = transitions.Where(e => e.Symbol == '$').Select(e => e.ToState).ToList();
+            foreach (T epsilonState in epsilonStates)
+            {
+                transitions.AddRange(GetTransition(epsilonState));
+            }
+            return transitions;
+        }
+    }
 }
