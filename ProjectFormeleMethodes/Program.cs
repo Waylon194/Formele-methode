@@ -4,6 +4,8 @@
 using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.RegExpressions;
 using ProjectFormeleMethodes.Languages;
+using ProjectFormeleMethodes.NDFA;
+using ProjectFormeleMethodes.NDFA.Testing;
 
 namespace ProjectFormeleMethodes
 {
@@ -13,8 +15,12 @@ namespace ProjectFormeleMethodes
 
         public static void Main(string[] args)
         {
-            TestRegExp();
-            TestLanguage();
+            Automata<string> a = new Automata<string>();
+
+            a = TestAutomata.ExampleSlide8Lesson2();
+            Console.WriteLine("Test: " + a.ToString());
+            //TestAutomata.ExampleSlide8Lesson2();
+            
         }
 
         public static void TestRegExp()

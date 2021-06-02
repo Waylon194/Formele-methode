@@ -6,89 +6,92 @@
 /// 
 /// We use '$' to denote the empty symbol epsilon
 /// 
-/// @author Paul de Mast
+/// @author Paul de Mast, 
 /// @version 1.0
-/// </summary>
 
-public class Transition<T> : IComparable<Transition<T>> where T : IComparable
+// Updates* With edits from Waylon Lodder & Vincent de Rooij to fix formatting for Java to C#
+
+/// </summary>s
+
+namespace ProjectFormeleMethodes.NDFA.Transitions
 {
-	public const char EPSILON = '$';
-	private T fromState;
-	private char symbol;
-	private T toState;
+    public class Transition<T> : IComparable<Transition<T>> where T : IComparable
+    {
+        public const char EPSILON = '$';
+        private T fromState;
+        private char symbol;
+        private T toState;
 
-   // this constructor can be used to define loops:
-	public Transition(T fromOrTo, char s) : this(fromOrTo, s, fromOrTo)
-	{
+        public T FromState
+        {
+            get
+            {
+                return fromState;
+            }
+        }
 
-	}
+        public T ToState
+        {
+            get
+            {
+                return toState;
+            }
+        }
 
-	public Transition(T from, T to) : this(from, EPSILON, to)
-	{
+        public char Symbol
+        {
+            get
+            {
+                return symbol;
+            }
+        }
 
-	}
+        // this constructor can be used to define loops:
+        public Transition(T fromOrTo, char symbol) : this(fromOrTo, symbol, fromOrTo)
+        {
 
-	public Transition(T from, char s, T to)
-	{
-		this.fromState = from;
-		this.symbol = s;
-		this.toState = to;
-	}
+        }
 
-	// overriding equals
-	public override bool Equals(object other)
-	{
-	   if (other == null)
-	   {
-		  return false;
-	   }
-	   else if (other is Transition)
-	   {
-			   return this.fromState.Equals(((Transition)other).fromState) && this.toState.Equals(((Transition)other).toState) && this.symbol == (((Transition)other).symbol);
-	   }
-	   else
-	   {
-		   return false;
-	   }
-	}
+        public Transition(T from, T to) : this(from, EPSILON, to)
+        {
 
-//JAVA TO C# CONVERTER TODO TASK: Most Java annotations will not have direct .NET equivalent attributes:
-//ORIGINAL LINE: @SuppressWarnings("unchecked") public int compareTo(Transition<T> t)
-	public int CompareTo(Transition<T> t)
-	{
-		int fromCmp = fromState.CompareTo(t.fromState);
-		int symbolCmp = (new char?(symbol)).compareTo(new char?(t.symbol));
-		int toCmp = toState.CompareTo(t.toState);
+        }
 
-		return (fromCmp != 0 ? fromCmp : (symbolCmp != 0 ? symbolCmp : toCmp));
-	}
+        public Transition(T from, char symbol, T to)
+        {
+            this.fromState = from;
+            this.symbol = symbol;
+            this.toState = to;
+        }
 
-	public T FromState
-	{
-		get
-		{
-			return fromState;
-		}
-	}
+        // overriding equals
+        public override bool Equals(object other)
+        {
+            // define the object type to type of transition, with type T comparable
+            Transition<T> transition = other as Transition<T>;
 
-	public T ToState
-	{
-		get
-		{
-			return toState;
-		}
-	}
+            // if the transition is not null, check if states and symbols overlap
+            if (transition != null)
+            {
+                return this.fromState.Equals(transition.FromState) && this.toState.Equals(transition.ToState) && this.symbol == (transition.Symbol);
+            }
+            return false;
+        }
 
-	public char Symbol
-	{
-		get
-		{
-			return symbol;
-		}
-	}
+        public int CompareTo(Transition<T> t2)
+        {
+            // compares the individual items between each other
+            int fromCmp = this.fromState.CompareTo(t2.fromState);
+            int symbolCmp = this.symbol.CompareTo(t2.symbol);
+            int toCmp = this.toState.CompareTo(t2.toState);
 
-	public override string ToString()
-	{
-	   return "(" + this.FromState + ", " + this.Symbol + ")" + "-->" + this.ToState;
-	}
+            // if from compare != 0, return value of "fromCmp", else check the symbolCmp 
+            return (fromCmp != 0 ? fromCmp : (symbolCmp != 0 ? symbolCmp : toCmp));
+        }
+
+        public override string ToString()
+        {
+            return "(" + this.FromState + ", " + this.Symbol + ")" + "-->" + this.ToState;
+        }
+    }
 }
