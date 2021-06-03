@@ -14,9 +14,9 @@ namespace ProjectFormeleMethodes.RegExpressions
         // Daarnaast ook een operator definitie voor 1 keer repeteren (default)
         public RegExpOperatorTypes OperatorType;
 
-        public RegExp left;
-        public RegExp right;
-        public SortedSet<string> curLang;
+        public RegExp Left;
+        public RegExp Right;
+        public SortedSet<string> CurrentLanguage;
 
         public int Compare(string s1, string s2)
         {
@@ -35,8 +35,8 @@ namespace ProjectFormeleMethodes.RegExpressions
         {
             this.OperatorType = RegExpOperatorTypes.ONCE;
             this.Terminals = "";
-            this.left = null;
-            this.right = null;
+            this.Left = null;
+            this.Right = null;
         }
 
         //  constructor
@@ -44,8 +44,8 @@ namespace ProjectFormeleMethodes.RegExpressions
         {
             this.OperatorType = RegExpOperatorTypes.ONCE;
             this.Terminals = p;
-            this.left = null;
-            this.right = null;
+            this.Left = null;
+            this.Right = null;
         }
 
         // definitions of the operators
@@ -53,7 +53,7 @@ namespace ProjectFormeleMethodes.RegExpressions
         {
             RegExp result = new RegExp();
             result.OperatorType = RegExpOperatorTypes.PLUS;
-            result.left = this;
+            result.Left = this;
             return result;
         }
 
@@ -61,7 +61,7 @@ namespace ProjectFormeleMethodes.RegExpressions
         {
             RegExp result = new RegExp();
             result.OperatorType = RegExpOperatorTypes.STAR;
-            result.left = this;
+            result.Left = this;
             return result;
         }
 
@@ -69,8 +69,8 @@ namespace ProjectFormeleMethodes.RegExpressions
         {
             RegExp result = new RegExp();
             result.OperatorType = RegExpOperatorTypes.OR;
-            result.left = this;
-            result.right = e2;
+            result.Left = this;
+            result.Right = e2;
             return result;
         }
 
@@ -78,8 +78,8 @@ namespace ProjectFormeleMethodes.RegExpressions
         {
             RegExp result = new RegExp();
             result.OperatorType = RegExpOperatorTypes.DOT;
-            result.left = this;
-            result.right = e2;
+            result.Left = this;
+            result.Right = e2;
             return result;
         }
 
@@ -107,16 +107,16 @@ namespace ProjectFormeleMethodes.RegExpressions
                     // LanguageLeft.left == null:
                     //  When true -> {languageLeft = emptyLanguage }
                     //  When false -> { languageLeft = this.left.getLanguage(maxSteps - 1) }
-                    languageLeft = this.left == null ? emptyLanguage : this.left.getLanguage(amountOfIterations - 1);
-                    languageRight = this.right == null ? emptyLanguage : this.right.getLanguage(amountOfIterations - 1);
+                    languageLeft = this.Left == null ? emptyLanguage : this.Left.getLanguage(amountOfIterations - 1);
+                    languageRight = this.Right == null ? emptyLanguage : this.Right.getLanguage(amountOfIterations - 1);
 
                     languageResult.UnionWith(languageLeft);
                     languageResult.UnionWith(languageRight);
                     break;
 
                 case RegExpOperatorTypes.DOT:
-                    languageLeft = this.left == null ? emptyLanguage : this.left.getLanguage(amountOfIterations - 1);
-                    languageRight = this.right == null ? emptyLanguage : this.right.getLanguage(amountOfIterations - 1);
+                    languageLeft = this.Left == null ? emptyLanguage : this.Left.getLanguage(amountOfIterations - 1);
+                    languageRight = this.Right == null ? emptyLanguage : this.Right.getLanguage(amountOfIterations - 1);
                     foreach (string s1 in languageLeft)
                         foreach (string s2 in languageRight)
                         { languageResult.Add(s1 + s2); }
@@ -125,7 +125,7 @@ namespace ProjectFormeleMethodes.RegExpressions
                 // STAR(*) and PLUS(+) operators are almost exactly the same, *=0 or more, +=1 or more:
                 case RegExpOperatorTypes.STAR:
                 case RegExpOperatorTypes.PLUS:
-                    languageLeft = this.left == null ? emptyLanguage : this.left.getLanguage(amountOfIterations - 1);
+                    languageLeft = this.Left == null ? emptyLanguage : this.Left.getLanguage(amountOfIterations - 1);
                     languageResult.UnionWith(languageLeft);
                     for (int i = 1; i < amountOfIterations; i++)
                     {

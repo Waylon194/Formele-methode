@@ -17,9 +17,12 @@ namespace ProjectFormeleMethodes
         {
             Automata<string> a = new Automata<string>();
 
-            a = TestAutomata.ExampleSlide8Lesson2();
-            Console.WriteLine("Test: " + a.ToString());
+            //a = TestAutomata.ExampleSlide8Lesson2();
+            //Console.WriteLine("Test: " + a.ToString());
             //TestAutomata.ExampleSlide8Lesson2();
+
+            TestRegExp();
+            TestLanguage();
             
         }
 
@@ -45,6 +48,12 @@ namespace ProjectFormeleMethodes
 
             // expr5: "(baa | bb)+ (a|b)*"
             all = regPlus.Dot(regStar);
+
+            var o = ThompsonConstructor.ConvertRegExp(all);
+
+            Console.WriteLine();
+
+
         }
 
         public static void TestLanguage()

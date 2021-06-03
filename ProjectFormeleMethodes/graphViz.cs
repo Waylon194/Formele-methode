@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ProjectFormeleMethodes.NDFA;
+using ProjectFormeleMethodes.NDFA.Transitions;
+using System;
 using System.Collections.Generic;
 /* TODO: Add graphviz files...
 using GraphVizWrapper;
@@ -54,14 +56,16 @@ namespace ProjectFormeleMethodes
         static void GenerateGraphFile(string data, string filename)
         {
             //Errors below will be fixed once imports are fixed
-            GetStartProcessQuery getStartProcessQuery = new GetStartProcessQuery();
-            GetProcessStartInfoQuery getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            RegisterLayoutPluginCommand registerLayoutPluginCommand =
-                new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
 
-            GraphGeneration wrapper = new GraphGeneration(getStartProcessQuery,
-                getProcessStartInfoQuery,
-                registerLayoutPluginCommand);
+            //GetStartProcessQuery getStartProcessQuery = new GetStartProcessQuery();
+            //GetProcessStartInfoQuery getProcessStartInfoQuery = new GetProcessStartInfoQuery();
+            //RegisterLayoutPluginCommand registerLayoutPluginCommand =
+            //    new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
+
+            //GraphGeneration wrapper = new GraphGeneration(getStartProcessQuery,
+            //    getProcessStartInfoQuery,
+            //    registerLayoutPluginCommand);
+
 
             //byte[] output = wrapper.GenerateGraph(data, Enums.GraphReturnType.Jpg);
             //System.IO.File.WriteAllBytes("Images/" + filename + ".jpg", output);

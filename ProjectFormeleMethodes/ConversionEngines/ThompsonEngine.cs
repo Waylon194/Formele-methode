@@ -1,10 +1,7 @@
 ﻿using ProjectFormeleMethodes.NDFA;
+using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.RegExpressions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 /// <summary>
 ///  The Rules of the Thompson Construction
@@ -29,6 +26,8 @@ using System.Threading.Tasks;
 ///  *Rule 6: The translation of a star operator ( '*' ) or STAR-operator
 ///  - The Rule states to the exact same thing as done with the PLUS-operator (Rule 5), but add an additional transition which goes from the start state to the end state. 
 /// 
+///  *** To ensure all pieces are touched this thompson constructor works for out to in. 
+///         So when dealing with (a|ab)* the star gets done first. -> (a|ab)* <-, then  a ->|<- ab, and so on..  
 /// 
 /// </summary>
 
@@ -51,48 +50,112 @@ namespace ProjectFormeleMethodes.ConversionEngines
 
             // define start and end states as a start of the thompson construction, with start state "S" and end state "F"
             // here we create our first blackbox "around" our regular expression
-            ndfaModel.DefineAsStartState("S");
-            ndfaModel.DefineAsFinalState("F");
 
-            // we convert the regular expression step by step to a NDFA
-            convert(regularExpression, ref ndfaModel);
+            // define start and stop states
+            ndfaModel.DefineAsStartState("qS"); // leftState
+            ndfaModel.DefineAsFinalState("qF"); // rightState
+            int currentStateCounter = 1; // let the states begin counting from 1. 
+
+            // we convert the regular expression step by step to a NDFA, make ndfaModel and stateCounter referable, to make it possible to use a call-by-reference design.
+            convert(regularExpression, ref ndfaModel, ref currentStateCounter, "qS", "qF"); 
+
+
 
             return ndfaModel;
         }
 
         //
-        private void convert(RegExp inputExpression, ref Automata<string> outputFormat)
+        private void convert(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
         {
-            switch (inputExpression.OperatorType)
+            switch (expression.OperatorType)
             {
                 case RegExpOperatorTypes.PLUS:
+                    plusConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert plus to NDFA
                     break;
+
                 case RegExpOperatorTypes.STAR:
+                    starConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert star to NDFA
                     break;
+
                 case RegExpOperatorTypes.OR:
+                    orConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert or to NDFA
                     break;
+
                 case RegExpOperatorTypes.DOT:
+                    dotConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert dot to NDFA
                     break;
+
                 case RegExpOperatorTypes.ONCE:
+                    onceConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert once to NDFA
                     break;
+
                 default:
+                    Console.WriteLine("Unsupported Operation!");
                     break;
             }
         }
 
         // 
-        private void convertPlusOperator()
+        private void plusConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
+        {
+            // "create" the new states
+            string stateC = "q" + currentStateCounter;
+            string stateD = "q" + (currentStateCounter + 1);
+            currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the new states
+
+            // add the new states to the automata / NDFA
+            ndfa.AddTransition(new Transition<string>(stateA, 'ɛ', stateC)); // bind the incoming start state to the new state
+            ndfa.AddTransition(new Transition<string>(stateD, 'ɛ', stateC)); // bind the second new state to the first new state 
+            ndfa.AddTransition(new Transition<string>(stateD, 'ɛ', stateB)); // bind the second new state to the last incoming state 
+
+            // set the new "A" and "B" states and call the convert method again to start another conversion
+            string newStateA = stateC; // the new start state 
+            string newStateB = stateD; // the new end state 
+
+            // call the convert method
+            convert(expression, ref ndfa, ref currentStateCounter, newStateA, newStateB);
+        }
+
+        private void starConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
+        {
+            // "create" the new states
+            string stateC = "q" + currentStateCounter;
+            string stateD = "q" + (currentStateCounter + 1);
+            currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the new states
+
+            // add the new states to the automata / NDFA
+            ndfa.AddTransition(new Transition<string>(stateA, 'ɛ', stateB)); // bind both incoming states together
+            ndfa.AddTransition(new Transition<string>(stateA, 'ɛ', stateC)); // bind the incoming start state to the new state
+            ndfa.AddTransition(new Transition<string>(stateD, 'ɛ', stateC)); // bind the second new state to the first new state 
+            ndfa.AddTransition(new Transition<string>(stateD, 'ɛ', stateB)); // bind the second new state to the last incoming state 
+
+            // set the new "A" and "B" states and call the convert method again to start another conversion
+            string newStateA = stateC; // the new start state 
+            string newStateB = stateD; // the new end state 
+
+            // call the convert method
+            convert(expression, ref ndfa, ref currentStateCounter, newStateA, newStateB);
+        }
+
+        private void orConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
         {
 
         }
 
-        private void convertStarOperator()
+        private void dotConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
         {
 
         }
 
+        private void onceConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
+        {
+            // "create" the new states
+            string stateA = "q" + currentStateCounter;
+            string stateB = "q" + (currentStateCounter + 1);
+            currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the states
 
+            // add the new states to the automata / NDFA
 
-            
+        }
     }
 }
