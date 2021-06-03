@@ -21,7 +21,7 @@ namespace ProjectFormeleMethodes
             Console.WriteLine("Test: " + a.ToString());
             TestAutomata.ExampleSlide8Lesson2();
 
-            GraphViz.PrintGraph(a, "TestGraph");
+            GraphVizEngine.PrintGraph(a, "TestGraph");
 
             //TestRegExpAndThompson();
             //TestLanguage();

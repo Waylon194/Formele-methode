@@ -1,18 +1,17 @@
 ﻿using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.Visualization;
-using QuikGraph.Graphviz;
 using System;
 using System.Collections.Generic;
-/* TODO: Add graphviz files...
-using GraphVizWrapper;
-using GraphVizWrapper.Commands;
-using GraphVizWrapper.Queries;
-*/
 
 namespace ProjectFormeleMethodes
 {
-    class GraphViz
+    /// <summary>
+    /// 
+    /// Credits to https://github.com/MaurodeLyon/Formele-methoden/blob/master/Formele%20methoden/GraphVizParser.cs
+    /// 
+    /// </summary>
+    public class GraphVizEngine
     {
         public static void PrintGraph(Automata<string> data, string filename)
         {
@@ -32,7 +31,7 @@ namespace ProjectFormeleMethodes
 
             foreach (string t in finalStates)
             {
-                toPrint += " " + ("S" + t) + " ";
+                toPrint += " " + (t) + " ";
             }
             toPrint += "; ";
             toPrint += " ";
@@ -40,12 +39,12 @@ namespace ProjectFormeleMethodes
 
             foreach (string state in startStates)
             {
-                toPrint += " " + ("SSS") + "-> " + ("S" + state);
+                toPrint += " " + ("SSS") + "-> " + (state);
             }
 
             foreach (Transition<string> t in transitions)
             {
-                toPrint += " " + ("S" + t.FromState) + " -> " + ("S" + t.ToState) + " " + "[ label = " + "\"" +
+                toPrint += " " + (t.FromState) + " -> " + (t.ToState) + " " + "[ label = " + "\"" +
                            t.Symbol + "\"" + " ];";
             }
             toPrint += " }";
