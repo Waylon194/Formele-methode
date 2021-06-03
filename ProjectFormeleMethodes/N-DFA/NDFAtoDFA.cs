@@ -230,6 +230,7 @@ namespace ProjectFormeleMethodes.ConversionEngines
             return reverseAutomaat;
         }
 
+        // The minimize method of the DFA
         public static Automata<string> OptimizeDfa(Automata<string> dfa)
         {
             //Automaat<string> one = Reverse(dfa);

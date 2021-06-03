@@ -22,8 +22,7 @@ namespace ProjectFormeleMethodes
             //TestAutomata.ExampleSlide8Lesson2();
 
             TestRegExp();
-            TestLanguage();
-            
+            TestLanguage();           
         }
 
         public static void TestRegExp()
@@ -49,11 +48,11 @@ namespace ProjectFormeleMethodes
             // expr5: "(baa | bb)+ (a|b)*"
             all = regPlus.Dot(regStar);
 
-            var o = ThompsonConstructor.ConvertRegExp(all);
+            ThompsonEngine thomas = new ThompsonEngine();
+
+            var o2 = thomas.ConvertToDFA(all);
 
             Console.WriteLine();
-
-
         }
 
         public static void TestLanguage()

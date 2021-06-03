@@ -2,8 +2,13 @@
 using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.RegExpressions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
+/// 
+///  Build with use of https://github.com/MaurodeLyon/Formele-methoden/blob/master/Formele%20methoden/ThompsonConstruction.cs 
+/// 
 ///  The Rules of the Thompson Construction
 ///  
 ///  *Rule 1: The translation of a single Terminal Symbol (e.g. "a", "b", "ɛ", etc..)
@@ -57,14 +62,14 @@ namespace ProjectFormeleMethodes.ConversionEngines
             int currentStateCounter = 1; // let the states begin counting from 1. 
 
             // we convert the regular expression step by step to a NDFA, make ndfaModel and stateCounter referable, to make it possible to use a call-by-reference design.
-            convert(regularExpression, ref ndfaModel, ref currentStateCounter, "qS", "qF"); 
+            convert(regularExpression, ref ndfaModel, ref currentStateCounter, "qS", "qF");
 
-
-
+            // add the symbols of the regular expression to the NDFA
+            ndfaModel.Symbols = new SortedSet<char>(ndfaModel.Transitions.Distinct().Select(e => e.Symbol).ToList());
             return ndfaModel;
         }
 
-        //
+        // Method to handle all forms of conversion
         private void convert(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
         {
             switch (expression.OperatorType)
@@ -93,9 +98,8 @@ namespace ProjectFormeleMethodes.ConversionEngines
                     Console.WriteLine("Unsupported Operation!");
                     break;
             }
-        }
+        } 
 
-        // 
         private void plusConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
         {
             // "create" the new states
@@ -113,7 +117,7 @@ namespace ProjectFormeleMethodes.ConversionEngines
             string newStateB = stateD; // the new end state 
 
             // call the convert method
-            convert(expression, ref ndfa, ref currentStateCounter, newStateA, newStateB);
+            convert(expression.Left, ref ndfa, ref currentStateCounter, newStateA, newStateB);
         }
 
         private void starConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
@@ -134,28 +138,97 @@ namespace ProjectFormeleMethodes.ConversionEngines
             string newStateB = stateD; // the new end state 
 
             // call the convert method
-            convert(expression, ref ndfa, ref currentStateCounter, newStateA, newStateB);
+            convert(expression.Left, ref ndfa, ref currentStateCounter, newStateA, newStateB);
         }
 
-        private void orConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
-        {
-
-        }
-
-        private void dotConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
-        {
-
-        }
-
-        private void onceConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string leftState, string rightState)
+        private void orConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
         {
             // "create" the new states
-            string stateA = "q" + currentStateCounter;
-            string stateB = "q" + (currentStateCounter + 1);
-            currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the states
+            string stateC = "q" + currentStateCounter;
+            string stateD = "q" + (currentStateCounter + 1);
+            string stateE = "q" + (currentStateCounter + 2);
+            string stateF = "q" + (currentStateCounter + 3);
+            currentStateCounter += 4; // up the state counter by 2 times to keep the keep track of the new states
 
             // add the new states to the automata / NDFA
+            ndfa.AddTransition(new Transition<string>(stateA, 'ɛ', stateC)); // bind the incoming start state to the new state
+            ndfa.AddTransition(new Transition<string>(stateA, 'ɛ', stateE)); // bind the incoming start state to another new state
+            ndfa.AddTransition(new Transition<string>(stateD, 'ɛ', stateB)); // bind the new state to the last incoming state 
+            ndfa.AddTransition(new Transition<string>(stateF, 'ɛ', stateB)); // bind another new state to the last incoming state 
 
+            // set the new "A" and "B" states, by assigning the states C and D, and call the convert method again to start another conversion
+            string newStateA = stateC; // the new start state 
+            string newStateB = stateD; // the new end state 
+
+            // call the convert method
+            convert(expression.Left, ref ndfa, ref currentStateCounter, newStateA, newStateB);
+
+            // Now to the same but for the other blackbox (StateE and StateF)
+            // set the new "A" and "B" states and call the convert method again to start another conversion
+            newStateA = stateE; // the new start state 
+            newStateB = stateF; // the new end state 
+
+            // call the convert method
+            convert(expression.Right, ref ndfa, ref currentStateCounter, newStateA, newStateB);
+        }
+
+        private void dotConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
+        {
+            // "create" the new states
+            string stateC = "q" + currentStateCounter;
+            string stateD = "q" + (currentStateCounter + 1);
+            currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the new states
+
+            // add the new states to the automata / NDFA
+            ndfa.AddTransition(new Transition<string>(stateC, 'ɛ', stateD)); // link both the blackboxes together
+
+            // set the new "A" and "B" states, by assigning the states C and D, and call the convert method again to start another conversion
+            string newStateB = stateC; // the new end state 
+
+            // call the convert method
+            convert(expression.Left, ref ndfa, ref currentStateCounter, stateA, newStateB);
+
+            // Now to the same but for the other blackbox (StateE and StateF)
+            // set the new "A" and "B" states and call the convert method again to start another conversion
+            string newStateA = stateD; // the new start state 
+
+            // call the convert method
+            convert(expression.Right, ref ndfa, ref currentStateCounter, newStateA, stateB);
+        }
+
+        private void onceConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
+        {
+            char[] terminals = expression.Terminals.ToCharArray();
+            if (terminals.Length == 1) // if the Terminals only contain one Terminal e.g. "a", or "b" , etc...
+            {
+                // add it to the transitions
+                ndfa.AddTransition(new Transition<string>(stateA, terminals[0], stateB));
+            }
+            else if(terminals.Length == 0) // if a terminal contains an epsilon symbol add it to the transitions
+            {
+                ndfa.AddTransition(new Transition<string>(stateA, 'ɛ'));
+            }
+            else
+            {
+                // assign the temporary state via the currentStateCounter
+                string temporaryStateB = "q" + currentStateCounter;
+                ndfa.AddTransition(new Transition<string>(stateA.ToString(), terminals[0], temporaryStateB));
+                int i = 1;
+
+                // constantly subtract from the length to ensure the right terminals are done. 
+                while (i < terminals.Length - 1)
+                {
+                    string newStateA = "q" + currentStateCounter;
+                    string newStateB = "q" + (currentStateCounter + 1);
+                    ndfa.AddTransition(new Transition<string>(newStateA, terminals[i], newStateB));
+                    currentStateCounter++;
+                    i++;
+                }
+                // bring the temporary-state up to date
+                temporaryStateB = "q" + currentStateCounter;
+                ndfa.AddTransition(new Transition<string>(temporaryStateB, terminals[i], stateB));
+                currentStateCounter++;
+            }
         }
     }
 }
