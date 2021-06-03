@@ -11,7 +11,9 @@ using System.Linq;
 /// 
 /// @author Paul de Mast
 /// @version 1.0
-/// 
+
+// Updates* With edits from Waylon Lodder & Vincent de Rooij to fix formatting for Java to C#
+
 /// </summary>
 
 namespace ProjectFormeleMethodes.NDFA

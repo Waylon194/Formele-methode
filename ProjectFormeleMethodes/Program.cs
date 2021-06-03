@@ -1,31 +1,33 @@
-﻿using System;
-
-// Our own usables
+﻿// Our own usables
 using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.RegExpressions;
-using ProjectFormeleMethodes.Languages;
 using ProjectFormeleMethodes.NDFA;
+
+using System;
+using ProjectFormeleMethodes.Regular_Expression;
 using ProjectFormeleMethodes.NDFA.Testing;
 
 namespace ProjectFormeleMethodes
 {
     public class Program
     {
-        private static RegExp baa, bb, baaOrbb, regPlus, all, a, b, regStar;
+        private static RegExp baa, bb, baaOrbb, baaOrbborEp, regPlus, all, a, b, regStar;
 
         public static void Main(string[] args)
         {
             Automata<string> a = new Automata<string>();
 
-            //a = TestAutomata.ExampleSlide8Lesson2();
-            //Console.WriteLine("Test: " + a.ToString());
-            //TestAutomata.ExampleSlide8Lesson2();
+            a = TestAutomata.ExampleSlide8Lesson2();
+            Console.WriteLine("Test: " + a.ToString());
+            TestAutomata.ExampleSlide8Lesson2();
 
-            TestRegExp();
-            TestLanguage();           
+            GraphViz.PrintGraph(a, "TestGraph");
+
+            //TestRegExpAndThompson();
+            //TestLanguage();
         }
 
-        public static void TestRegExp()
+        public static void TestRegExpAndThompson()
         {
             a = new RegExp("a");
             b = new RegExp("b");
@@ -39,31 +41,43 @@ namespace ProjectFormeleMethodes
             // expr3: "(baa | bb)"
             baaOrbb = baa.Or(bb);
 
-            // all: "(a|b)*"
+            // expr4: "(baa | bb | ɛ)"
+            //baaOrbborEp = baaOrbb.AndOr(new RegExp());
+
+            // expr5: "(a|b)*"
             regStar = (a.Or(b)).Star();
 
-            // expr4: "(baa | bb)+"
+            // expr6: "(baa | bb)+"
             regPlus = baaOrbb.Plus();
 
-            // expr5: "(baa | bb)+ (a|b)*"
+            // all: "(baa | bb)+ ⋅ (a|b)*"
             all = regPlus.Dot(regStar);
 
-            ThompsonEngine thomas = new ThompsonEngine();
+            //all.PrintRegularExpression();
 
+            all.PrintRegularExpression();
+
+            TestLanguage();
+
+            // Test Thompson Conversion
+            ThompsonEngine thomas = new ThompsonEngine();
             var o2 = thomas.ConvertToDFA(all);
 
             Console.WriteLine();
         }
 
-        public static void TestLanguage()
+        public static void TestLanguage(RegExp exp = null)
         {
-            Console.WriteLine("taal van (baa):\n" + baa.getLanguage(5));
-            Console.WriteLine("taal van (bb):\n" + bb.getLanguage(5));
-            Console.WriteLine("taal van (baa | bb):\n" + baaOrbb.getLanguage(5));
+            // create a new logic manipulator object
+            RegExpLogicOperator rLogic = new RegExpLogicOperator(exp);
 
-            Console.WriteLine("taal van (a|b)*:\n" + regStar.getLanguage(5));
-            Console.WriteLine("taal van (baa | bb)+:\n" + regPlus.getLanguage(5));
-            Console.WriteLine("taal van (baa | bb)+ (a|b)*:\n" + all.getLanguage(6));
+            Console.WriteLine("taal van (baa):\n" + rLogic.getAcceptedLanguages(baa, 5));
+            Console.WriteLine("taal van (bb):\n" + rLogic.getAcceptedLanguages(bb, 5));
+            Console.WriteLine("taal van (baa | bb):\n" + rLogic.getAcceptedLanguages(baaOrbb, 5));
+
+            Console.WriteLine("taal van (a|b)*:\n" + rLogic.getAcceptedLanguages(regStar, 5));
+            Console.WriteLine("taal van (baa | bb)+:\n" + rLogic.getAcceptedLanguages(regPlus, 5));
+            Console.WriteLine("taal van (baa | bb)+ (a|b)*:\n" + rLogic.getAcceptedLanguages(all, 6));
         }
     }
 }

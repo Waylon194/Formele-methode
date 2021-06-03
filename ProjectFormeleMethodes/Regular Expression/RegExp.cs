@@ -6,29 +6,20 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.RegExpressions
 {
-    public class RegExp : IComparer<string>
+    public class RegExp
     {
         public string Terminals;
 
         // Possible operators for a Reg Exp ([+], [*], [|], [.]) 
-        // Daarnaast ook een operator definitie voor 1 keer repeteren (default)
         public RegExpOperatorTypes OperatorType;
-
+        
         public RegExp Left;
         public RegExp Right;
-        public SortedSet<string> CurrentLanguage;
+        public SortedSet<string> CurrentAcceptedLanguage = null;
+        public string CurrentRegularExpression;
 
-        public int Compare(string s1, string s2)
-        {
-            if (s1.Length == s2.Length)
-            {
-                return s1.CompareTo(s2);
-            }
-            else
-            {
-                return s1.Length - s2.Length;
-            }
-        }
+        // ?
+        public SortedSet<string> CurrentUnacceptedLanguage = null;
 
         // default constructor
         public RegExp()
@@ -37,6 +28,9 @@ namespace ProjectFormeleMethodes.RegExpressions
             this.Terminals = "";
             this.Left = null;
             this.Right = null;
+
+            // keep track of the current regular expression
+            this.CurrentRegularExpression = "ɛ"; // add Epsilon to an empty regular expression
         }
 
         //  constructor
@@ -46,6 +40,9 @@ namespace ProjectFormeleMethodes.RegExpressions
             this.Terminals = p;
             this.Left = null;
             this.Right = null;
+
+            // keep track of the current regular expression
+            this.CurrentRegularExpression = p;
         }
 
         // definitions of the operators
@@ -54,6 +51,9 @@ namespace ProjectFormeleMethodes.RegExpressions
             RegExp result = new RegExp();
             result.OperatorType = RegExpOperatorTypes.PLUS;
             result.Left = this;
+
+            // keep track of the current regular expression
+            result.CurrentRegularExpression = this.CurrentRegularExpression + "+";
             return result;
         }
 
@@ -62,6 +62,9 @@ namespace ProjectFormeleMethodes.RegExpressions
             RegExp result = new RegExp();
             result.OperatorType = RegExpOperatorTypes.STAR;
             result.Left = this;
+
+            // keep track of the current regular expression
+            result.CurrentRegularExpression = this.CurrentRegularExpression + "*";
             return result;
         }
 
@@ -71,8 +74,29 @@ namespace ProjectFormeleMethodes.RegExpressions
             result.OperatorType = RegExpOperatorTypes.OR;
             result.Left = this;
             result.Right = e2;
+
+            // keep track of the current regular expression
+            result.CurrentRegularExpression ="(" + this.CurrentRegularExpression + " | " + e2.CurrentRegularExpression + ")";
             return result;
         }
+
+        //public RegExp AndOr(RegExp e2)
+        //{
+        //    RegExp result = new RegExp();
+        //    result.OperatorType = RegExpOperatorTypes.OR;
+        //    result.Left = this;
+        //    result.Right = e2;
+
+        //    if (this.OperatorType == RegExpOperatorTypes.OR)
+        //    {
+        //        this.CurrentRegularExpression = this.CurrentRegularExpression.Replace("(", "");
+        //        this.CurrentRegularExpression = this.CurrentRegularExpression.Replace(")", "");
+        //    }
+
+        //    // keep track of the current regular expression
+        //    result.CurrentRegularExpression = "(" + this.CurrentRegularExpression + " | " + e2.CurrentRegularExpression + ")";
+        //    return result;
+        //}
 
         public RegExp Dot(RegExp e2)
         {
@@ -80,75 +104,32 @@ namespace ProjectFormeleMethodes.RegExpressions
             result.OperatorType = RegExpOperatorTypes.DOT;
             result.Left = this;
             result.Right = e2;
+
+            // keep track of the current regular expression
+            result.CurrentRegularExpression = this.CurrentRegularExpression + " ⋅ " + e2.CurrentRegularExpression;
             return result;
         }
 
-        // getLanguages
-        public SortedSet<string> getLanguage(int amountOfIterations)
+        public void PrintRegularExpression()
         {
-            SortedSet<string> emptyLanguage = new SortedSet<string>(this); // this type gets added to ensure the end of the recursion
-            SortedSet<string> languageResult = new SortedSet<string>(this); // this is the variable which keeps tracks of the possibilities
-
-            SortedSet<string> languageLeft, languageRight; // languages of the left and right sides of an expression
-
-            if (amountOfIterations < 1)
+            if (this.CurrentRegularExpression != null)
             {
-                return emptyLanguage;
+                Console.WriteLine("This is the current Regular Expression:");
+                Console.WriteLine(this.ToString() + "\n");
             }
-
-            switch (this.OperatorType)
+            else
             {
-                case RegExpOperatorTypes.ONCE:
-                    languageResult.Add(this.Terminals);
-                    break;
-
-                case RegExpOperatorTypes.OR:
-                    // Condition description
-                    // LanguageLeft.left == null:
-                    //  When true -> {languageLeft = emptyLanguage }
-                    //  When false -> { languageLeft = this.left.getLanguage(maxSteps - 1) }
-                    languageLeft = this.Left == null ? emptyLanguage : this.Left.getLanguage(amountOfIterations - 1);
-                    languageRight = this.Right == null ? emptyLanguage : this.Right.getLanguage(amountOfIterations - 1);
-
-                    languageResult.UnionWith(languageLeft);
-                    languageResult.UnionWith(languageRight);
-                    break;
-
-                case RegExpOperatorTypes.DOT:
-                    languageLeft = this.Left == null ? emptyLanguage : this.Left.getLanguage(amountOfIterations - 1);
-                    languageRight = this.Right == null ? emptyLanguage : this.Right.getLanguage(amountOfIterations - 1);
-                    foreach (string s1 in languageLeft)
-                        foreach (string s2 in languageRight)
-                        { languageResult.Add(s1 + s2); }
-                    break;
-
-                // STAR(*) and PLUS(+) operators are almost exactly the same, *=0 or more, +=1 or more:
-                case RegExpOperatorTypes.STAR:
-                case RegExpOperatorTypes.PLUS:
-                    languageLeft = this.Left == null ? emptyLanguage : this.Left.getLanguage(amountOfIterations - 1);
-                    languageResult.UnionWith(languageLeft);
-                    for (int i = 1; i < amountOfIterations; i++)
-                    {
-                        HashSet<string> languageTemp = new HashSet<string>(languageResult);
-                        foreach (string s1 in languageLeft)
-                        {
-                            foreach (string s2 in languageTemp)
-                            {
-                                languageResult.Add(s1 + s2);
-                            }
-                        }
-                    }
-                    if (this.OperatorType == RegExpOperatorTypes.STAR) // if the regular expression is a star variant add the possiblity of "" (epsilon)
-                    {
-                        languageResult.Add("");
-                    }
-                    break;
-
-                default:
-                    Console.WriteLine("getLanguage() encountered an unknown operator: " + this.OperatorType.ToString());
-                    break;
+                Console.WriteLine("Regular Expression Empty!\n");
             }
-            return languageResult;
+        }
+
+        public override string ToString()
+        {
+            if (this.CurrentRegularExpression != null)
+            {
+                return this.CurrentRegularExpression;
+            }
+            return "Regular Expression Empty!";
         }
     }
 }

@@ -42,7 +42,9 @@ namespace ProjectFormeleMethodes.ConversionEngines
     /// Class responsible for converting a Regular Expression to a NDFA format
     /// </summary>
     public class ThompsonEngine
-    {        
+    {
+        private const string STATE_DEFINER_SYMBOL = "q";
+
         public ThompsonEngine()
         {
             // default Constructor to acces methods
@@ -57,12 +59,12 @@ namespace ProjectFormeleMethodes.ConversionEngines
             // here we create our first blackbox "around" our regular expression
 
             // define start and stop states
-            ndfaModel.DefineAsStartState("qS"); // leftState
-            ndfaModel.DefineAsFinalState("qF"); // rightState
+            ndfaModel.DefineAsStartState(STATE_DEFINER_SYMBOL + "S"); // leftState
+            ndfaModel.DefineAsFinalState(STATE_DEFINER_SYMBOL + "F"); // rightState
             int currentStateCounter = 1; // let the states begin counting from 1. 
 
             // we convert the regular expression step by step to a NDFA, make ndfaModel and stateCounter referable, to make it possible to use a call-by-reference design.
-            convert(regularExpression, ref ndfaModel, ref currentStateCounter, "qS", "qF");
+            convert(regularExpression, ref ndfaModel, ref currentStateCounter, STATE_DEFINER_SYMBOL + "S", STATE_DEFINER_SYMBOL + "F");
 
             // add the symbols of the regular expression to the NDFA
             ndfaModel.Symbols = new SortedSet<char>(ndfaModel.Transitions.Distinct().Select(e => e.Symbol).ToList());
@@ -75,23 +77,23 @@ namespace ProjectFormeleMethodes.ConversionEngines
             switch (expression.OperatorType)
             {
                 case RegExpOperatorTypes.PLUS:
-                    plusConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert plus to NDFA
+                    plusConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert plus-operator to NDFA
                     break;
 
                 case RegExpOperatorTypes.STAR:
-                    starConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert star to NDFA
+                    starConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert star-operator to NDFA
                     break;
 
                 case RegExpOperatorTypes.OR:
-                    orConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert or to NDFA
+                    orConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert or-operator to NDFA
                     break;
 
                 case RegExpOperatorTypes.DOT:
-                    dotConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert dot to NDFA
+                    dotConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert dot-operator to NDFA
                     break;
 
                 case RegExpOperatorTypes.ONCE:
-                    onceConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert once to NDFA
+                    onceConversion(expression, ref ndfa, ref currentStateCounter, leftState, rightState); // convert once-operator to NDFA
                     break;
 
                 default:
@@ -103,8 +105,8 @@ namespace ProjectFormeleMethodes.ConversionEngines
         private void plusConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
         {
             // "create" the new states
-            string stateC = "q" + currentStateCounter;
-            string stateD = "q" + (currentStateCounter + 1);
+            string stateC = STATE_DEFINER_SYMBOL + currentStateCounter;
+            string stateD = STATE_DEFINER_SYMBOL + (currentStateCounter + 1);
             currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the new states
 
             // add the new states to the automata / NDFA
@@ -123,8 +125,8 @@ namespace ProjectFormeleMethodes.ConversionEngines
         private void starConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
         {
             // "create" the new states
-            string stateC = "q" + currentStateCounter;
-            string stateD = "q" + (currentStateCounter + 1);
+            string stateC = STATE_DEFINER_SYMBOL + currentStateCounter;
+            string stateD = STATE_DEFINER_SYMBOL + (currentStateCounter + 1);
             currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the new states
 
             // add the new states to the automata / NDFA
@@ -144,10 +146,10 @@ namespace ProjectFormeleMethodes.ConversionEngines
         private void orConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
         {
             // "create" the new states
-            string stateC = "q" + currentStateCounter;
-            string stateD = "q" + (currentStateCounter + 1);
-            string stateE = "q" + (currentStateCounter + 2);
-            string stateF = "q" + (currentStateCounter + 3);
+            string stateC = STATE_DEFINER_SYMBOL + currentStateCounter;
+            string stateD = STATE_DEFINER_SYMBOL + (currentStateCounter + 1);
+            string stateE = STATE_DEFINER_SYMBOL + (currentStateCounter + 2);
+            string stateF = STATE_DEFINER_SYMBOL + (currentStateCounter + 3);
             currentStateCounter += 4; // up the state counter by 2 times to keep the keep track of the new states
 
             // add the new states to the automata / NDFA
@@ -175,8 +177,8 @@ namespace ProjectFormeleMethodes.ConversionEngines
         private void dotConversion(RegExp expression, ref Automata<string> ndfa, ref int currentStateCounter, string stateA, string stateB)
         {
             // "create" the new states
-            string stateC = "q" + currentStateCounter;
-            string stateD = "q" + (currentStateCounter + 1);
+            string stateC = STATE_DEFINER_SYMBOL + currentStateCounter;
+            string stateD = STATE_DEFINER_SYMBOL + (currentStateCounter + 1);
             currentStateCounter += 2; // up the state counter by 2 times to keep the keep track of the new states
 
             // add the new states to the automata / NDFA
@@ -211,21 +213,21 @@ namespace ProjectFormeleMethodes.ConversionEngines
             else
             {
                 // assign the temporary state via the currentStateCounter
-                string temporaryStateB = "q" + currentStateCounter;
+                string temporaryStateB = STATE_DEFINER_SYMBOL + currentStateCounter;
                 ndfa.AddTransition(new Transition<string>(stateA.ToString(), terminals[0], temporaryStateB));
                 int i = 1;
 
                 // constantly subtract from the length to ensure the right terminals are done. 
                 while (i < terminals.Length - 1)
                 {
-                    string newStateA = "q" + currentStateCounter;
-                    string newStateB = "q" + (currentStateCounter + 1);
+                    string newStateA = STATE_DEFINER_SYMBOL + currentStateCounter;
+                    string newStateB = STATE_DEFINER_SYMBOL + (currentStateCounter + 1);
                     ndfa.AddTransition(new Transition<string>(newStateA, terminals[i], newStateB));
                     currentStateCounter++;
                     i++;
                 }
                 // bring the temporary-state up to date
-                temporaryStateB = "q" + currentStateCounter;
+                temporaryStateB = STATE_DEFINER_SYMBOL + currentStateCounter;
                 ndfa.AddTransition(new Transition<string>(temporaryStateB, terminals[i], stateB));
                 currentStateCounter++;
             }

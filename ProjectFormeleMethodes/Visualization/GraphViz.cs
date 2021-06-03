@@ -1,5 +1,7 @@
 ﻿using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
+using ProjectFormeleMethodes.Visualization;
+using QuikGraph.Graphviz;
 using System;
 using System.Collections.Generic;
 /* TODO: Add graphviz files...
@@ -10,7 +12,7 @@ using GraphVizWrapper.Queries;
 
 namespace ProjectFormeleMethodes
 {
-    class graphViz
+    class GraphViz
     {
         public static void PrintGraph(Automata<string> data, string filename)
         {
@@ -55,20 +57,14 @@ namespace ProjectFormeleMethodes
 
         static void GenerateGraphFile(string data, string filename)
         {
-            //Errors below will be fixed once imports are fixed
+            string filePath = $@"..\..\..\Visualization\Graphs\{filename}";
+            
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(filePath + ".dot"))
+            {
+                file.Write(data);
+            }
 
-            //GetStartProcessQuery getStartProcessQuery = new GetStartProcessQuery();
-            //GetProcessStartInfoQuery getProcessStartInfoQuery = new GetProcessStartInfoQuery();
-            //RegisterLayoutPluginCommand registerLayoutPluginCommand =
-            //    new RegisterLayoutPluginCommand(getProcessStartInfoQuery, getStartProcessQuery);
-
-            //GraphGeneration wrapper = new GraphGeneration(getStartProcessQuery,
-            //    getProcessStartInfoQuery,
-            //    registerLayoutPluginCommand);
-
-
-            //byte[] output = wrapper.GenerateGraph(data, Enums.GraphReturnType.Jpg);
-            //System.IO.File.WriteAllBytes("Images/" + filename + ".jpg", output);
+            DotGraphEngine.Run(filePath);
         }
     }
 }

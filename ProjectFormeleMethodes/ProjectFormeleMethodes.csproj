@@ -5,4 +5,18 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Visualization\bin\**" />
+    <EmbeddedResource Remove="Visualization\bin\**" />
+    <None Remove="Visualization\bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QuikGraph.Graphviz" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Visualization\Graphs\" />
+  </ItemGroup>
+
 </Project>

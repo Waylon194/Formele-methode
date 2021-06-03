@@ -7,8 +7,30 @@
   "targets": {
     ".NETCoreApp,Version=v5.0": {
       "ProjectFormeleMethodes/1.0.0": {
+        "dependencies": {
+          "QuikGraph.Graphviz": "2.3.0"
+        },
         "runtime": {
           "ProjectFormeleMethodes.dll": {}
+        }
+      },
+      "QuikGraph/2.3.0": {
+        "runtime": {
+          "lib/netstandard2.0/QuikGraph.dll": {
+            "assemblyVersion": "2.3.0.0",
+            "fileVersion": "2.3.0.0"
+          }
+        }
+      },
+      "QuikGraph.Graphviz/2.3.0": {
+        "dependencies": {
+          "QuikGraph": "2.3.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/QuikGraph.Graphviz.dll": {
+            "assemblyVersion": "2.3.0.0",
+            "fileVersion": "2.3.0.0"
+          }
         }
       }
     }
@@ -18,6 +40,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "QuikGraph/2.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Vhj33jEOi4xQlJHFOrhDf29MgYLYnPi4z6ywIVvPhe/nUkCihj3kynWI9PaK+HM29ati5rd1SUON5z2sslEsVw==",
+      "path": "quikgraph/2.3.0",
+      "hashPath": "quikgraph.2.3.0.nupkg.sha512"
+    },
+    "QuikGraph.Graphviz/2.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qeDO/A2t8lABGmK6a3o0IdjVZwZCvYoIHMYWDYvXZrBqW6WEy1FSOR/n/Y0eKFJq67r1J5mirD0cG6Ghqevr3g==",
+      "path": "quikgraph.graphviz/2.3.0",
+      "hashPath": "quikgraph.graphviz.2.3.0.nupkg.sha512"
     }
   }
 }
