@@ -17,7 +17,7 @@ namespace ProjectFormeleMethodes.NDFA.Transitions
 {
     public class Transition<T> : IComparable<Transition<T>> where T : IComparable
     {
-        public const char EPSILON = '$';
+        public const char EPSILON = 'ɛ';
         private T fromState;
         private char symbol;
         private T toState;
