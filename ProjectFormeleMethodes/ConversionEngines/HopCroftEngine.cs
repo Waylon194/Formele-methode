@@ -46,10 +46,18 @@ namespace ProjectFormeleMethodes.ConversionEngines
             }
 
             // the partition is now ready to be used and search for equivalent nodes     
+            // create some variables to prepare optimization
+            int currentLetterIndex = 67; // start with the correct letter index;
+
             optimizePartition(partitionStart);
 
             return dfaOptimal;
         }  
+
+        public string AssignBlockLetterToTransition(int letterToAssign, Transition<string> transition)
+        {
+            return "";
+        }
 
         private Partition optimizePartition(Partition partition)
         {
