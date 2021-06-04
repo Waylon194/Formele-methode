@@ -24,6 +24,7 @@ namespace ProjectFormeleMethodes.NDFA
         public SortedSet<T> States { get; }
         public SortedSet<T> StartStates { get; set; }
         public SortedSet<T> FinalStates { get; set; }
+        private SortedSet<T> NormalStates;
         public SortedSet<char> Symbols { get; set; }
 
         public Automata() : this(new SortedSet<char>())
@@ -40,6 +41,7 @@ namespace ProjectFormeleMethodes.NDFA
             States = new SortedSet<T>();
             StartStates = new SortedSet<T>();
             FinalStates = new SortedSet<T>();
+            NormalStates = new SortedSet<T>();
             Symbols = symbols;
         }
 
@@ -48,6 +50,20 @@ namespace ProjectFormeleMethodes.NDFA
             Transitions.Add(t);
             States.Add(t.FromState);
             States.Add(t.ToState);
+            NormalStates.Add(t.FromState);
+            NormalStates.Add(t.ToState);
+        }
+
+        public SortedSet<T> GetNormalStates()
+        {
+            foreach (var endState in FinalStates)
+            {
+                if (NormalStates.Contains(endState))
+                {
+                    NormalStates.Remove(endState);
+                }              
+            }
+            return this.NormalStates;
         }
 
         public void DefineAsStartState(T t)
@@ -75,7 +91,7 @@ namespace ProjectFormeleMethodes.NDFA
 
         public bool IsDfa()
         {
-            bool isDfa = !(Transitions.Where(e => e.Symbol.Equals('$')).ToList().Count > 0);
+            bool isDfa = !(Transitions.Where(e => e.Symbol.Equals('ɛ')).ToList().Count > 0);
             foreach (T state in States)
             {
                 foreach (char symbol in Symbols)

@@ -91,7 +91,7 @@ namespace ProjectFormeleMethodes.NDFA.Transitions
 
         public override string ToString()
         {
-            return "(" + this.FromState + ", " + this.Symbol + ")" + "-->" + this.ToState;
+            return this.FromState + "--[ " + this.Symbol + " ]-->" + this.ToState;
         }
     }
 }

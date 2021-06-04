@@ -18,10 +18,12 @@ namespace ProjectFormeleMethodes
             Automata<string> a = new Automata<string>();
 
             a = TestAutomata.ExampleSlide8Lesson2();
-            Console.WriteLine("Test: " + a.ToString());
-            TestAutomata.ExampleSlide8Lesson2();
+            //Console.WriteLine("Test: " + a.ToString());
 
-            GraphVizEngine.PrintGraph(a, "TestGraph");
+            HopCroftEngine hopEngine = new HopCroftEngine();
+            hopEngine.MinimizeDFA(a);
+
+            //GraphVizEngine.PrintGraph(a, "TestGraph");
 
             //TestRegExpAndThompson();
             //TestLanguage();
