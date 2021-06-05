@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
 {
-    public class BlockRow
+    public class RowPiece
     {
-        public string BlockId { get; private set; } // the id of the block, so an A, B, etc..
+        public string PieceId { get; private set; } // the id of the RowPiece, so an A, B, etc..
         public Transition<string> Transition { get; private set; } // the transitions of the state 
 
-        public BlockRow(string blockId, Transition<string> transitions)
+        public RowPiece(string pieceId, Transition<string> transitions)
         {
-            this.BlockId = blockId;
+            this.PieceId = pieceId;
             this.Transition = transitions;
         }
 
         public override string ToString()
         {
-            return "BlockID: " + this.BlockId  + ", " + Transition.ToString();
+            return "BlockID: " + this.PieceId  + ", " + Transition.ToString();
         }
     }
 }

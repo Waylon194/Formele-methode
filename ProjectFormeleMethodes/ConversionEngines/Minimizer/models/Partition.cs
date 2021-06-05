@@ -10,16 +10,16 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
 {
     public class Partition
     {
-        private SortedSet<Block> blocks; // the container for the blocks
+        private SortedSet<PartitionPiece> pieces; // the container for the blocks
         private SortedSet<string> allStates; // all available states to optimize
-        private Automata<string> toOptimizeDFA; // a link to the automata to 
-        private char blockIndex = (char) 65; // 65, equals the character 'A'
+        private Automata<string> dfaToOptimize; // a link to the automata to 
+        private char pieceIndex = (char) 65; // 65, equals the character 'A'
 
         public Partition(SortedSet<string> allStates, Automata<string> dfa)
         {
-            this.blocks = new SortedSet<Block>();
+            this.pieces = new SortedSet<PartitionPiece>();
             this.allStates = allStates;
-            this.toOptimizeDFA = dfa;
+            this.dfaToOptimize = dfa;
         }
 
         public SortedSet<string> GetAllStates()
@@ -27,14 +27,14 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             return this.allStates;
         }
 
-        public SortedSet<Block> GetAllBlocks()
+        public SortedSet<PartitionPiece> GetAllPieces()
         {
-            return this.blocks;
+            return this.pieces;
         }
 
         public Automata<string> GetAutomata()
         {
-            return this.toOptimizeDFA;
+            return this.dfaToOptimize;
         }
 
         public void SetAvailableStates(SortedSet<string> states)
@@ -42,57 +42,57 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             this.allStates = states;
         }
 
-        public void AddTransitionsToBlock(Block block, string stateId, List<Transition<string>> transitions)
+        public void AddTransitionsToPartitionPiece(PartitionPiece piece, string stateId, List<Transition<string>> transitions)
         {
             foreach (var transition in transitions)
             {
-                block.AddBlockRowToPartition(new BlockRow(block.GetBlockId(), transition));
+                piece.AddRowToPartitionPiece(stateId, new RowPiece(piece.GetPieceId(), transition));
             }
         }
 
-        public Block GetBlockById(string blockId)
+        public PartitionPiece GetPartitionPieceById(string piece)
         {
-            foreach (var block in this.blocks)
+            foreach (var block in this.pieces)
             {
-                if (block.GetBlockId().Equals(blockId))
+                if (block.GetPieceId().Equals(piece))
                 {
                     return block;
                 }
             }
-            Console.WriteLine("There is no block with id: {0}", blockId);
+            Console.WriteLine("There is no block with id: {0}", piece);
             return null;
         }
 
-        public void AddBlockToPartition(SortedSet<string> stateIds, bool isEndStateType)
+        public void AddPieceToPartition(SortedSet<string> stateIds, bool isEndStateType)
         {
-            Block block = new Block(this.blockIndex.ToString(), stateIds, isEndStateType);
+            PartitionPiece piece = new PartitionPiece(this.pieceIndex.ToString(), stateIds, isEndStateType);
 
             foreach (var sId in stateIds)
             {
-                AddTransitionsToBlock(block, sId, this.toOptimizeDFA.GetTransition(sId));
+                AddTransitionsToPartitionPiece(piece, sId, this.dfaToOptimize.GetTransition(sId));
             }
-            this.blocks.Add(block);
+            this.pieces.Add(piece);
 
-            this.blockIndex++; // add +1 to the char to change letter, e.g. A --> B
+            this.pieceIndex++; // add +1 to the char to change letter, e.g. A --> B
         }
 
-        public string GetAllBlocksString()
+        public string GetAllPiecesString()
         {
             string result = "";
 
-            foreach (var block in this.blocks)
+            foreach (var piece in this.pieces)
             {
-                result += block.GetBlockId() + ",";
+                result += piece.GetPieceId() + ",";
             }
 
             return result;
         }
 
-        public SortedSet<Block> GetAllBlocksExcept(Block blockToXclude)
+        public SortedSet<PartitionPiece> GetAllPiecesExcept(PartitionPiece pieceToXclude)
         {
-            SortedSet<Block> listOfBlocks = new SortedSet<Block>(this.blocks);
-            listOfBlocks.Remove(blockToXclude);
-            return listOfBlocks;
+            SortedSet<PartitionPiece> nonRemovedPieces = new SortedSet<PartitionPiece>(this.pieces);
+            nonRemovedPieces.Remove(pieceToXclude);
+            return nonRemovedPieces;
         }
 
         public string GetAllStatesString()
@@ -109,7 +109,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
 
         public override string ToString()
         {
-            return "BlocksInPartition: {" + GetAllBlocksString() + "} ,StatesOfDFA: {" + GetAllStatesString() + "}";
+            return "BlocksInPartition: {" + GetAllPiecesString() + "} ,StatesOfDFA: {" + GetAllStatesString() + "}";
         }
     }
 }

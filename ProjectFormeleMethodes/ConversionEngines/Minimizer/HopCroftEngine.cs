@@ -20,46 +20,24 @@ namespace ProjectFormeleMethodes.ConversionEngines
         public Automata<string> MinimizeDFA(Automata<string> dfaToOptimize)
         {
             var dfaOptimal = new Automata<string>();
-            // First start with assigning the partition
-            // Create a Partition
 
             // - Get all normal state ids (start + non-end states)
             SortedSet<string> normalStateIds = dfaToOptimize.GetNormalStates();
             // - Get all end-state ids
             SortedSet<string> endStateIds = dfaToOptimize.FinalStates;
 
-            // Assign a new Block to the partition
+            // Create a Partition
             Partition partitionStart = new Partition(dfaToOptimize.States, dfaToOptimize); // add all the available states to the partition 
-            partitionStart.AddBlockToPartition(normalStateIds, false); // Assign the normal states to a block 
-            partitionStart.AddBlockToPartition(endStateIds, true); // Assign the normal states to a block 
+            // Assign new pieces to a partition
+            partitionStart.AddPieceToPartition(normalStateIds, false); // Assign the normal states to a piece 
+            partitionStart.AddPieceToPartition(endStateIds, true); // Assign the normal states to a piece 
 
             // the partition is now ready to be used and search for equivalent nodes     
             // create some variables to prepare optimization
             optimizePartition(partitionStart, true);
 
+            // ** method to create optimal DFA machine **
             return dfaOptimal;
-        }
-
-        private string getProperTransitionBlockId(string toState, Block blockToSearch, Partition partition)
-        {
-            foreach (var state in blockToSearch.GetStates())
-            {
-                if (toState.Equals(state))
-                {
-                    return blockToSearch.GetBlockId();
-                }
-            }
-            foreach (var block in partition.GetAllBlocksExcept(blockToSearch))
-            {
-                foreach (var state in block.GetStates())
-                {
-                    if (toState.Equals(state))
-                    {
-                        return block.GetBlockId();
-                    }
-                }
-            }
-            return null; // if this gets returned something went wrong
         }
 
         private Partition optimizePartition(Partition inputPartition, bool firstIteration)
@@ -68,54 +46,94 @@ namespace ProjectFormeleMethodes.ConversionEngines
             {
                 // check for optimized partition
                 bool optimized = checkPartitionOptimized(inputPartition);
-                if (optimized)
+                if (optimized) // if fully optimized return the same partition
                 {
                     return inputPartition;
                 }
             }
-            // setup the temporaryRows list
-            List<Block> temporaryBlocks = new List<Block>();
+            // setup the temporaryRows list, this list will also contain the processedRowPieces
+            List<PartitionPiece> temporaryPieces = new List<PartitionPiece>();
 
             // assign the proper block letters to the rows
-            foreach (var block in inputPartition.GetAllBlocks())
+            foreach (var piece in inputPartition.GetAllPieces())
             {
-                Block newBlock = new Block(block.GetBlockId(), block.GetStates(), block.IsBlockEndState());
-                foreach (var row in block.GetBlockRows())
+                List<ProcessedRowPiece> pRowPieces = new List<ProcessedRowPiece>();
+                PartitionPiece newPiece = new PartitionPiece(piece.GetPieceId(), piece.GetStates(), piece.PieceContainsEndStates());
+                foreach (var row in piece.GetRows())
                 {
-                    string blockIdToAssign = getProperTransitionBlockId(row.Transition.ToState, block, inputPartition);
-                    newBlock.AddBlockRowToPartition(new BlockRow(blockIdToAssign, row.Transition));
+                    string pieceIdToAssign = getProperTransitionPieceId(row.Item2.Transition.ToState, piece, inputPartition);
+                    newPiece.AddRowToPartitionPiece(row.Item2.Transition.FromState, new RowPiece(pieceIdToAssign, row.Item2.Transition));
                 }
-                temporaryBlocks.Add(newBlock);
+                temporaryPieces.Add(newPiece);
+
+                // start the processing of the created rows, to sort the data neatly inside a class package
+                foreach (var state in piece.GetStates()) // now with the new information the rows can be processed
+                {
+                    ProcessedRowPiece pRowPiece = new ProcessedRowPiece(state);
+                    foreach (var item in newPiece.GetRows())
+                    {
+                        if (state.Equals(item.Item2.Transition.FromState))
+                        {
+                            pRowPiece.AddPieceId(item.Item2.PieceId);
+                        }
+                    }
+                    pRowPieces.Add(pRowPiece);
+                }
+                // set and add the processedRowPieces to the list
+                newPiece.SetProcessedRowPieces(pRowPieces);
             }
 
             // after the rows are designated
-            Partition newPartition = CreateNewPartition(inputPartition, temporaryBlocks);
+            Partition newPartition = CreateNewPartition(inputPartition, temporaryPieces);
 
             return newPartition; // a safety measure to  
             return optimizePartition(newPartition, false); // since this is not the first iteration, the partition gets optimized as normal, and a new rows model gets spit out
         }
 
-        private Partition CreateNewPartition(Partition oldPartition, List<Block> temporaryBlocks)
+        // Sets the correct pieceId 
+        private string getProperTransitionPieceId(string toState, PartitionPiece pieceToSearch, Partition partition)
+        {
+            foreach (var state in pieceToSearch.GetStates())
+            {
+                if (toState.Equals(state))
+                {
+                    return pieceToSearch.GetPieceId();
+                }
+            }
+            foreach (var piece in partition.GetAllPiecesExcept(pieceToSearch))
+            {
+                foreach (var state in piece.GetStates())
+                {
+                    if (toState.Equals(state))
+                    {
+                        return piece.GetPieceId();
+                    }
+                }
+            }
+            return null; // if this gets returned something went wrong
+        }
+
+        private Partition CreateNewPartition(Partition oldPartition, List<PartitionPiece> temporaryBlocks)
         {
             // first create the new partition object
             Partition newPartition = new Partition(oldPartition.GetAllStates(), oldPartition.GetAutomata());
 
-            List<Block> blocks = new List<Block>(); // these are the new blocks of the new partition
+            List<PartitionPiece> pieces = new List<PartitionPiece>(); // these are the new blocks of the new partition
 
-            foreach (var block in temporaryBlocks)
+            foreach (var piece in temporaryBlocks)
             {
-                if (block.GetBlockRows().Count != 1) // if it does not contain a single entry, a block can be checked for equivalency 
+                if (piece.GetRows().Count != 1) // if it does not contain a single entry, a block can be checked for equivalency 
                 {
-                    blocks.AddRange(replaceEquivalentBlocks(block)); // add new blocks which are created from the list
+                    pieces.AddRange(replaceEquivalentPieces(piece)); // add new blocks which are created from the list
                 }
             }
 
             return newPartition;
         }
 
-        private List<Block> replaceEquivalentBlocks(Block block)
+        private List<PartitionPiece> replaceEquivalentPieces(PartitionPiece piece)
         {
-            List<Block> newBlocks = new List<Block>();
+            List<PartitionPiece> newPieces = new List<PartitionPiece>();
 
             //foreach (var state in block.GetStates())
             //{
