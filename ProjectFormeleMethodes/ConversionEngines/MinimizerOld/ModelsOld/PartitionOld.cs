@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
 {
-    public class Partition
+    public class PartitionOld
     {
-        private SortedSet<PartitionPiece> pieces; // the container for the blocks
+        private SortedSet<PartitionPieceOld> pieces; // the container for the blocks
         private SortedSet<string> allStates; // all available states to optimize
         private Automata<string> dfaToOptimize; // a link to the automata to 
         private char pieceIndex = (char) 65; // 65, equals the character 'A'
 
-        public Partition(SortedSet<string> allStates, Automata<string> dfa)
+        public PartitionOld(SortedSet<string> allStates, Automata<string> dfa)
         {
-            this.pieces = new SortedSet<PartitionPiece>();
+            this.pieces = new SortedSet<PartitionPieceOld>();
             this.allStates = allStates;
             this.dfaToOptimize = dfa;
         }
@@ -27,7 +27,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             return this.allStates;
         }
 
-        public SortedSet<PartitionPiece> GetAllPieces()
+        public SortedSet<PartitionPieceOld> GetAllPieces()
         {
             return this.pieces;
         }
@@ -42,15 +42,15 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             this.allStates = states;
         }
 
-        public void AddTransitionsToPartitionPiece(PartitionPiece piece, string stateId, List<Transition<string>> transitions)
+        public void AddTransitionsToPartitionPiece(PartitionPieceOld piece, string stateId, List<Transition<string>> transitions)
         {
             foreach (var transition in transitions)
             {
-                piece.AddRowToPartitionPiece(stateId, new RowPiece(piece.GetPieceId(), transition));
+                piece.AddRowToPartitionPiece(stateId, new RowPieceOld(piece.GetPieceId(), transition));
             }
         }
 
-        public PartitionPiece GetPartitionPieceById(string piece)
+        public PartitionPieceOld GetPartitionPieceById(string piece)
         {
             foreach (var block in this.pieces)
             {
@@ -65,7 +65,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
 
         public void AddPieceToPartition(SortedSet<string> stateIds, bool isEndStateType)
         {
-            PartitionPiece piece = new PartitionPiece(this.pieceIndex.ToString(), stateIds, isEndStateType);
+            PartitionPieceOld piece = new PartitionPieceOld(this.pieceIndex.ToString(), stateIds, isEndStateType);
 
             foreach (var sId in stateIds)
             {
@@ -88,9 +88,9 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             return result;
         }
 
-        public SortedSet<PartitionPiece> GetAllPiecesExcept(PartitionPiece pieceToXclude)
+        public SortedSet<PartitionPieceOld> GetAllPiecesExcept(PartitionPieceOld pieceToXclude)
         {
-            SortedSet<PartitionPiece> nonRemovedPieces = new SortedSet<PartitionPiece>(this.pieces);
+            SortedSet<PartitionPieceOld> nonRemovedPieces = new SortedSet<PartitionPieceOld>(this.pieces);
             nonRemovedPieces.Remove(pieceToXclude);
             return nonRemovedPieces;
         }

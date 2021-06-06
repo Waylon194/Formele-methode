@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
 {
-    public class RowPiece
+    public class RowPieceOld
     {
         public string PieceId { get; private set; } // the id of the RowPiece, so an A, B, etc..
         public Transition<string> Transition { get; private set; } // the transitions of the state 
 
-        public RowPiece(string pieceId, Transition<string> transitions)
+        public RowPieceOld(string pieceId, Transition<string> transitions)
         {
             this.PieceId = pieceId;
             this.Transition = transitions;

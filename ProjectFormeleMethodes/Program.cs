@@ -6,6 +6,8 @@ using ProjectFormeleMethodes.NDFA;
 using System;
 using ProjectFormeleMethodes.Regular_Expression;
 using ProjectFormeleMethodes.NDFA.Testing;
+using ProjectFormeleMethodes.ConversionEngines.Minimizer.Example;
+using ProjectFormeleMethodes.ConversionEngines.Minimizer;
 
 namespace ProjectFormeleMethodes
 {
@@ -20,8 +22,14 @@ namespace ProjectFormeleMethodes
             a = TestAutomata.ExampleSlide8Lesson2();
             //Console.WriteLine("Test: " + a.ToString());
 
-            HopCroftEngine hopEngine = new HopCroftEngine();
+            HopcroftEngine hopEngine = new HopcroftEngine();
             hopEngine.MinimizeDFA(a);
+
+            //HopCroftEngineOld hopEngineold = new HopCroftEngineOld();
+            //hopEngineold.MinimizeDFA(a);
+
+            //var res = HopCroftAlgor.MinimizeDfa(a);
+            Console.WriteLine();
 
             //GraphVizEngine.PrintGraph(a, "TestGraph");
 

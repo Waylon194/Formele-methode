@@ -24,7 +24,7 @@ namespace ProjectFormeleMethodes.NDFA
         public SortedSet<T> States { get; }
         public SortedSet<T> StartStates { get; set; }
         public SortedSet<T> FinalStates { get; set; }
-        private SortedSet<T> NormalStates;
+        public SortedSet<T> NormalStates { get; set; }
         public SortedSet<char> Symbols { get; set; }
 
         public Automata() : this(new SortedSet<char>())
@@ -61,7 +61,14 @@ namespace ProjectFormeleMethodes.NDFA
                 if (NormalStates.Contains(endState))
                 {
                     NormalStates.Remove(endState);
-                }              
+                }
+            }
+            foreach (var startState in StartStates)
+            {
+                if (NormalStates.Contains(startState))
+                {
+                    NormalStates.Remove(startState);
+                }
             }
             return this.NormalStates;
         }

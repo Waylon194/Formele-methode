@@ -1,154 +1,111 @@
-﻿using ProjectFormeleMethodes.ConversionEngines.Minimizer.models;
+﻿using ProjectFormeleMethodes.ConversionEngines.Minimizer.Models;
 using ProjectFormeleMethodes.NDFA;
-using ProjectFormeleMethodes.NDFA.Transitions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectFormeleMethodes.ConversionEngines
+namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
 {
-    // minimizer https://github.com/MaurodeLyon/Formele-methoden/blob/master/Formele%20methoden/HopcroftAlgorithm.cs <- helpfull link to the algorithm
-    public class HopCroftEngine
+    public class HopcroftEngine
     {
-        public HopCroftEngine()
-        {
-
-        }
-
         public Automata<string> MinimizeDFA(Automata<string> dfaToOptimize)
         {
+            // create a new dfa object, this is where the DFA ultimately will end up in
             var dfaOptimal = new Automata<string>();
-
-            // - Get all normal state ids (start + non-end states)
+            // - Get all normal state ids (non-end and start states)
             SortedSet<string> normalStateIds = dfaToOptimize.GetNormalStates();
             // - Get all end-state ids
             SortedSet<string> endStateIds = dfaToOptimize.FinalStates;
+            // - Get all start-state ids
+            SortedSet<string> startStateIds = dfaToOptimize.StartStates;
 
             // Create a Partition
-            Partition partitionStart = new Partition(dfaToOptimize.States, dfaToOptimize); // add all the available states to the partition 
-            // Assign new pieces to a partition
-            partitionStart.AddPieceToPartition(normalStateIds, false); // Assign the normal states to a piece 
-            partitionStart.AddPieceToPartition(endStateIds, true); // Assign the normal states to a piece 
+            PartitionTable partitionStart = new PartitionTable(dfaToOptimize); // add all the available states to the partition 
+            // Assign new pieces to the partition
+            partitionStart.AddRowsToPartitionTable(startStateIds, StateType.Start); // Assign the normal states to a piece
+            partitionStart.AddRowsToPartitionTable(normalStateIds, StateType.Normal); // Assign the normal states to a piece 
+            partitionStart.AddRowsToPartitionTable(endStateIds, StateType.End); // Assign the normal states to a piece 
+
+            partitionStart.SetCorrectDesignatedLetters(); // After filling in the rows, set the rows to their correct designated letter
 
             // the partition is now ready to be used and search for equivalent nodes     
             // create some variables to prepare optimization
-            optimizePartition(partitionStart, true);
+
+            var newPTable = OptimizePartitionTable(partitionStart);
 
             // ** method to create optimal DFA machine **
             return dfaOptimal;
         }
 
-        private Partition optimizePartition(Partition inputPartition, bool firstIteration)
+        public PartitionTable OptimizePartitionTable(PartitionTable partitionTable)
         {
-            if (!firstIteration)
-            {
-                // check for optimized partition
-                bool optimized = checkPartitionOptimized(inputPartition);
-                if (optimized) // if fully optimized return the same partition
-                {
-                    return inputPartition;
-                }
-            }
-            // setup the temporaryRows list, this list will also contain the processedRowPieces
-            List<PartitionPiece> temporaryPieces = new List<PartitionPiece>();
+            StateEquivalencyModel equivalencyModel;
+            List<Tuple<string, StateEquivalencyModel>> models = new List<Tuple<string, StateEquivalencyModel>>();
 
-            // assign the proper block letters to the rows
-            foreach (var piece in inputPartition.GetAllPieces())
+            // Count the amount of letter occurances
+            foreach (var state in partitionTable.StateLetters)
             {
-                List<ProcessedRowPiece> pRowPieces = new List<ProcessedRowPiece>();
-                PartitionPiece newPiece = new PartitionPiece(piece.GetPieceId(), piece.GetStates(), piece.PieceContainsEndStates());
-                foreach (var row in piece.GetRows())
+                equivalencyModel = new StateEquivalencyModel();
+                foreach (var item in partitionTable.GetRowsByState(state.LetterAssigned, state.State))
                 {
-                    string pieceIdToAssign = getProperTransitionPieceId(row.Item2.Transition.ToState, piece, inputPartition);
-                    newPiece.AddRowToPartitionPiece(row.Item2.Transition.FromState, new RowPiece(pieceIdToAssign, row.Item2.Transition));
-                }
-                temporaryPieces.Add(newPiece);
-
-                // start the processing of the created rows, to sort the data neatly inside a class package
-                foreach (var state in piece.GetStates()) // now with the new information the rows can be processed
-                {
-                    ProcessedRowPiece pRowPiece = new ProcessedRowPiece(state);
-                    foreach (var item in newPiece.GetRows())
+                    try
                     {
-                        if (state.Equals(item.Item2.Transition.FromState))
-                        {
-                            pRowPiece.AddPieceId(item.Item2.PieceId);
-                        }
+                        equivalencyModel.SymbolOccurence.Add(item.Item2.DesignatedLetter, 1);
                     }
-                    pRowPieces.Add(pRowPiece);
-                }
-                // set and add the processedRowPieces to the list
-                newPiece.SetProcessedRowPieces(pRowPieces);
-            }
-
-            // after the rows are designated
-            Partition newPartition = CreateNewPartition(inputPartition, temporaryPieces);
-
-            return newPartition; // a safety measure to  
-            return optimizePartition(newPartition, false); // since this is not the first iteration, the partition gets optimized as normal, and a new rows model gets spit out
-        }
-
-        // Sets the correct pieceId 
-        private string getProperTransitionPieceId(string toState, PartitionPiece pieceToSearch, Partition partition)
-        {
-            foreach (var state in pieceToSearch.GetStates())
-            {
-                if (toState.Equals(state))
-                {
-                    return pieceToSearch.GetPieceId();
-                }
-            }
-            foreach (var piece in partition.GetAllPiecesExcept(pieceToSearch))
-            {
-                foreach (var state in piece.GetStates())
-                {
-                    if (toState.Equals(state))
+                    catch (ArgumentException )
                     {
-                        return piece.GetPieceId();
+                        equivalencyModel.SymbolOccurence[item.Item2.DesignatedLetter]++;
                     }
                 }
+                models.Add(new Tuple<string, StateEquivalencyModel>(state.State,equivalencyModel));
             }
-            return null; // if this gets returned something went wrong
+
+            PartitionTable newTable = createNewPartitionTable(models);
+
+            return newTable;
         }
 
-        private Partition CreateNewPartition(Partition oldPartition, List<PartitionPiece> temporaryBlocks)
+        // TODO check method
+        private void assignEquivalency(List<Tuple<string, StateEquivalencyModel>> oldModels, ref List<List<string>> newPairs)
         {
-            // first create the new partition object
-            Partition newPartition = new Partition(oldPartition.GetAllStates(), oldPartition.GetAutomata());
-
-            List<PartitionPiece> pieces = new List<PartitionPiece>(); // these are the new blocks of the new partition
-
-            foreach (var piece in temporaryBlocks)
+            if (oldModels.Count() > 0)
             {
-                if (piece.GetRows().Count != 1) // if it does not contain a single entry, a block can be checked for equivalency 
+                List<string> states = new List<string>();
+                Tuple<string, StateEquivalencyModel> checkerModel = oldModels[0];
+                oldModels.Remove(checkerModel);
+                
+                // add the removed state to the states, this state will be used to check if states are equal
+                states.Add(checkerModel.Item1);
+
+                foreach (var item in oldModels)
                 {
-                    pieces.AddRange(replaceEquivalentPieces(piece)); // add new blocks which are created from the list
+                    if (item.Equals(checkerModel))
+                    {
+                        states.Add(item.Item1);
+                    }
                 }
-            }
+                newPairs.Add(states);
 
-            return newPartition;
+                if (oldModels.Count == 1)
+                {
+                    states = new List<string>();
+                    states.Add(oldModels[0].Item1);
+                }
+                assignEquivalency(oldModels, ref newPairs);
+            }            
         }
 
-        private List<PartitionPiece> replaceEquivalentPieces(PartitionPiece piece)
+        private PartitionTable createNewPartitionTable(List<Tuple<string, StateEquivalencyModel>> models)
         {
-            List<PartitionPiece> newPieces = new List<PartitionPiece>();
+            PartitionTable partitionTable = null;
+            List<Tuple<string, StateEquivalencyModel>> oldModels = new List<Tuple<string, StateEquivalencyModel>>(models);
+            List<List<string>> newPairs = new List<List<string>>();
 
-            //foreach (var state in block.GetStates())
-            //{
-            //    foreach (var subRow in block.GetBlockRows())
-            //    {
+            assignEquivalency(models, ref newPairs);
 
-            //    }
-            //}
-
-            return null;
-        }
-
-        private bool checkPartitionOptimized(Partition inputPartition)
-        {
-            return false;
+            return partitionTable;
         }
     }
 }

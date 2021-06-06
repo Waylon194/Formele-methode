@@ -10,25 +10,30 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
     /// <summary>
     /// The class which keeps track of the individual piece, which is added to a partition
     /// </summary>
-    public class PartitionPiece : IComparable<PartitionPiece>
+    public class PartitionPieceOld : IComparable<PartitionPieceOld>
     {
         private bool pieceContainsEndStates; // shows if block is endstate or not
 
         private string pieceId; // a Partition id, like A, B, etc.. 
 
-        private List<Tuple<string, RowPiece>> rows; // the transitions
+        private List<Tuple<string, RowPieceOld>> rows; // the transitions
         private SortedSet<string> states; // contains all the states which are inside of the block
-        private List<ProcessedRowPiece> processedRowPieces; // here data gets saved in the format of STATE, PieceID, PieceID (e.g. q1, A, A)
+        private List<ProcessedRowPieceOld> processedRowPieces; // here data gets saved in the format of STATE, PieceID, PieceID (e.g. q1, A, A)
 
-        public PartitionPiece(string blockId, SortedSet<string> states, bool blockIsEndState)
+        public PartitionPieceOld(string blockId, SortedSet<string> states, bool blockIsEndState)
         {
-            this.rows = new List<Tuple<string, RowPiece>>();
+            this.rows = new List<Tuple<string, RowPieceOld>>();
             this.pieceId = blockId;
             this.states = states;
             this.pieceContainsEndStates = blockIsEndState;
         }
 
-        public void SetProcessedRowPieces(List<ProcessedRowPiece> pRowPieces)
+        public List<ProcessedRowPieceOld> GetProcessedRows()
+        {
+            return this.processedRowPieces;
+        }
+
+        public void SetProcessedRowPieces(List<ProcessedRowPieceOld> pRowPieces)
         {
             this.processedRowPieces = pRowPieces;
         }
@@ -38,7 +43,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             return this.pieceContainsEndStates;
         }
 
-        public int CompareTo(PartitionPiece other)
+        public int CompareTo(PartitionPieceOld other)
         {
             return this.pieceId.CompareTo(other.pieceId);
         }
@@ -48,12 +53,12 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.models
             return this.pieceId;
         }
 
-        public void AddRowToPartitionPiece(string state, RowPiece row)
+        public void AddRowToPartitionPiece(string state, RowPieceOld row)
         {
-            this.rows.Add(new Tuple<string, RowPiece>(state, row));
+            this.rows.Add(new Tuple<string, RowPieceOld>(state, row));
         }
 
-        public List<Tuple<string, RowPiece>> GetRows()
+        public List<Tuple<string, RowPieceOld>> GetRows()
         {
             return this.rows;
         }
