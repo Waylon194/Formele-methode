@@ -8,10 +8,15 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Example
 {
-    public class HopCroftAlgor
+    public class HopCroftAlgorExample
     {
         public static Automata<string> MinimizeDfa(Automata<string> automaat)
         {
+            // safety check for when epsilon closures are detected, this cannot occur in a DFA, and so optimization cannot and should not start
+            if (automaat.Symbols.Contains(Transition<string>.EPSILON))
+            {
+                return null;
+            }
             SortedSet<PartitionExample> partitions = new SortedSet<PartitionExample>();
             PartitionExample nonFinals = new PartitionExample('A');
             PartitionExample finals = new PartitionExample('B');

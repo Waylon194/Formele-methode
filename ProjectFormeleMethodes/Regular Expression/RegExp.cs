@@ -80,24 +80,6 @@ namespace ProjectFormeleMethodes.RegExpressions
             return result;
         }
 
-        //public RegExp AndOr(RegExp e2)
-        //{
-        //    RegExp result = new RegExp();
-        //    result.OperatorType = RegExpOperatorTypes.OR;
-        //    result.Left = this;
-        //    result.Right = e2;
-
-        //    if (this.OperatorType == RegExpOperatorTypes.OR)
-        //    {
-        //        this.CurrentRegularExpression = this.CurrentRegularExpression.Replace("(", "");
-        //        this.CurrentRegularExpression = this.CurrentRegularExpression.Replace(")", "");
-        //    }
-
-        //    // keep track of the current regular expression
-        //    result.CurrentRegularExpression = "(" + this.CurrentRegularExpression + " | " + e2.CurrentRegularExpression + ")";
-        //    return result;
-        //}
-
         public RegExp Dot(RegExp e2)
         {
             RegExp result = new RegExp();

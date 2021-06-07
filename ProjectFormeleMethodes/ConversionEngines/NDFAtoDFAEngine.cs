@@ -233,10 +233,10 @@ namespace ProjectFormeleMethodes.ConversionEngines
         // The minimize method of the DFA
         public static Automata<string> OptimizeDfa(Automata<string> dfa)
         {
-            //Automaat<string> one = Reverse(dfa);
-            //Automaat<string> two = Convert(one);
-            //Automaat<string> three = Reverse(two);
-            //Automaat<string> four = Convert(three);
+            Automata<string> one = Reverse(dfa);
+            Automata<string> two = Convert(one);
+            Automata<string> three = Reverse(two);
+            Automata<string> four = Convert(three);
 
             //return four;
             return Convert(Reverse(Convert(Reverse(dfa))));

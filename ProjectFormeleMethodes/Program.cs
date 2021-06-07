@@ -1,42 +1,82 @@
 ﻿// Our own usables
 using ProjectFormeleMethodes.ConversionEngines;
-using ProjectFormeleMethodes.RegExpressions;
-using ProjectFormeleMethodes.NDFA;
-
-using System;
-using ProjectFormeleMethodes.Regular_Expression;
-using ProjectFormeleMethodes.NDFA.Testing;
-using ProjectFormeleMethodes.ConversionEngines.Minimizer.Example;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
+using ProjectFormeleMethodes.ConversionEngines.Minimizer.Example;
+using ProjectFormeleMethodes.NDFA;
+using ProjectFormeleMethodes.RegExpressions;
+using ProjectFormeleMethodes.Regular_Expression;
+using System;
+using System.Collections.Generic;
 
 namespace ProjectFormeleMethodes
 {
     public class Program
     {
         private static RegExp baa, bb, baaOrbb, baaOrbborEp, regPlus, all, a, b, regStar;
+        private static List<RegExp> regExps = new List<RegExp>();
 
         public static void Main(string[] args)
         {
-            Automata<string> a = new Automata<string>();
+            RegExp regB, regBaa, regBb;
+            regB = new RegExp("b");
 
-            a = TestAutomata.ExampleSlide14Lesson2();
-            //Console.WriteLine("Test: " + a.ToString());
+            // expr1: "baa"
+            regBaa = new RegExp("baa");
 
+            // expr2: "bb"
+            regBb = new RegExp("bb");
+
+            regExps.Add(regB);
+            regExps.Add(regBaa);
+            regExps.Add(regBb);
+
+            RegExp rexp = new RegExp("a");
+            RegExp b = new RegExp("b");
+            rexp = rexp.Or(b).Plus();
+
+            //rexp = GenerateRandomRegExp(5);
+            rexp.PrintRegularExpression();
+
+            // Test Thompson Conversion
+            // Getting a NDFA model
+            ThompsonEngine thomas = new ThompsonEngine(); 
+            var ndfa = thomas.ConvertToDFA(rexp);
+            //var dnfa =ThompsonConstructionExample.ConvertRegExp(rexp);
+
+            // Getting a DFA from a NDFA
+            Automata<string> dfa = NDFAtoDFAEngine.Convert(ndfa); // NDFAtoDFAEngine 
+
+            // Own Thompson engine
             HopcroftEngine hopEngine = new HopcroftEngine();
-            var b = hopEngine.MinimizeDFA(a);
+            var optimizedDFAOwn = hopEngine.MinimizeDFA(dfa);
 
-            //HopCroftEngineOld hopEngineold = new HopCroftEngineOld();
-            //hopEngineold.MinimizeDFA(a);
-
-            var res = HopCroftAlgor.MinimizeDfa(a);
+            //var optimizedDFAOwnExample = HopCroftAlgorExample.MinimizeDfa(dfa);
             Console.WriteLine();
 
-            GraphVizEngine.PrintGraph(a, "TestGraph");
-            GraphVizEngine.PrintGraph(b, "TestGraphOwnDesign");
-            GraphVizEngine.PrintGraph(b, "TestGraphGood");
+            GraphVizEngine.PrintGraph(ndfa, "TestGraphNDFA");
+            
+            //GraphVizEngine.PrintGraph(dfa, "TestGraphPreMinimizedSample");
+            //GraphVizEngine.PrintGraph(optimizedDFAOwn, "TestGraphOwnDesignSample");
+            //GraphVizEngine.PrintGraph(optimizedDFAOwnExample, "TestGraphExampleSample");
 
             //TestRegExpAndThompson();
             //TestLanguage();
+        }
+
+        public static RegExp GenerateRandomRegExp(int remainingSteps)
+        {
+
+
+            //while (remainingSteps > 0 )
+            //{
+            //    Random randomizer = new Random();
+            //    int randValue = randomizer.Next(0, 4);
+
+
+            //    remainingSteps--;
+            //}
+            //return rexp;
+            return null;
         }
 
         public static void TestRegExpAndThompson()

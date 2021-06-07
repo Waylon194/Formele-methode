@@ -13,6 +13,12 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
 
         public Automata<string> MinimizeDFA(Automata<string> dfaToOptimize)
         {
+            // safety check for when epsilon closures are detected, this cannot occur in a DFA, and so optimization cannot and should not start
+            if (dfaToOptimize.Symbols.Contains(Transition<string>.EPSILON))
+            {
+                return null;
+            }
+
             // - Get all start-state ids
             Dictionary<string, StateSuperType> startStates = new Dictionary<string, StateSuperType>();
             foreach (var item in dfaToOptimize.StartStates)
