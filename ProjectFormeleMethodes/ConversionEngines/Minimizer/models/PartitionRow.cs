@@ -20,7 +20,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
         public StateSubType SubType { get; private set; }
         public StateSuperType SuperType { get; private set; }
 
-        public PartitionRow(string tostate, char symbol, char rowLetter, bool isStartState)
+        public PartitionRow(string tostate, char symbol, char rowLetter)
         {
             this.ToState = tostate;
             this.Symbol = symbol;

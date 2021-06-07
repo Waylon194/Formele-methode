@@ -19,7 +19,7 @@ namespace ProjectFormeleMethodes
         {
             Automata<string> a = new Automata<string>();
 
-            a = TestAutomata.ExampleSlide8Lesson2();
+            a = TestAutomata.ExampleSlide14Lesson2();
             //Console.WriteLine("Test: " + a.ToString());
 
             HopcroftEngine hopEngine = new HopcroftEngine();
@@ -28,11 +28,12 @@ namespace ProjectFormeleMethodes
             //HopCroftEngineOld hopEngineold = new HopCroftEngineOld();
             //hopEngineold.MinimizeDFA(a);
 
-            //var res = HopCroftAlgor.MinimizeDfa(a);
+            var res = HopCroftAlgor.MinimizeDfa(a);
             Console.WriteLine();
 
             GraphVizEngine.PrintGraph(a, "TestGraph");
-            GraphVizEngine.PrintGraph(b, "TestGraphNew");
+            GraphVizEngine.PrintGraph(b, "TestGraphOwnDesign");
+            GraphVizEngine.PrintGraph(b, "TestGraphGood");
 
             //TestRegExpAndThompson();
             //TestLanguage();

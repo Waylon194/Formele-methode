@@ -13,21 +13,33 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
 
         public Automata<string> MinimizeDFA(Automata<string> dfaToOptimize)
         {
-            // create a new dfa object, this is where the DFA ultimately will end up in
-            var dfaOptimal = new Automata<string>();
-            // - Get all normal state ids (non-end and start states)
-            SortedSet<string> normalStateIds = dfaToOptimize.GetNormalStates();
-            // - Get all end-state ids
-            SortedSet<string> endStateIds = dfaToOptimize.FinalStates;
             // - Get all start-state ids
-            SortedSet<string> startStateIds = dfaToOptimize.StartStates;
+            Dictionary<string, StateSuperType> startStates = new Dictionary<string, StateSuperType>();
+            foreach (var item in dfaToOptimize.StartStates)
+            {
+                startStates.Add(item, StateSuperType.Start);
+            }
+
+            // - Get all normal state ids (non-end and start states)
+            Dictionary<string, StateSuperType> normalStates = new Dictionary<string, StateSuperType>();
+            foreach (var item in dfaToOptimize.GetNormalStates())
+            {
+                normalStates.Add(item, StateSuperType.Normal);
+            }
+
+            // - Get all end-state ids
+            Dictionary<string, StateSuperType> endStates = new Dictionary<string, StateSuperType>();
+            foreach (var item in dfaToOptimize.FinalStates)
+            {
+                endStates.Add(item, StateSuperType.End);
+            }
 
             // Create a Partition
             PartitionTable partitionStart = new PartitionTable(dfaToOptimize); // add all the available states to the partition 
             // Assign new pieces to the partition
-            partitionStart.AddRowsToPartitionTable(startStateIds.ToList(), StateSubType.NonEnd, StateSuperType.Start,true, true); // Assign the normal states to a piece, toggle true for changing the letter
-            partitionStart.AddRowsToPartitionTable(normalStateIds.ToList(), StateSubType.NonEnd, StateSuperType.Normal, false, false); // Assign the normal states to a piece, toggle false for keeping the letter
-            partitionStart.AddRowsToPartitionTable(endStateIds.ToList(), StateSubType.End, StateSuperType.End, false, true); // Assign the normal states to a piece, toggle true for changing the letter
+            partitionStart.AddRowsToPartitionTable(startStates, StateSubType.NonEnd ,true, true); // Assign the normal states to a piece, toggle true for changing the letter
+            partitionStart.AddRowsToPartitionTable(normalStates, StateSubType.NonEnd, false, false); // Assign the normal states to a piece, toggle false for keeping the letter
+            partitionStart.AddRowsToPartitionTable(endStates, StateSubType.End, false, true); // Assign the normal states to a piece, toggle true for changing the letter
 
             partitionStart.SetCorrectDesignatedLetters(); // After filling in the rows, set the rows to their correct designated letter
 
@@ -47,11 +59,8 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
             {
                 switch (item.Item2.SuperType)
                 {
-                    case StateSuperType.Start: 
-                        if (item.Item2.isStartState)
-                        {
-                            optimizedAutomata.DefineAsStartState(item.Item2.RowLetter.ToString());
-                        }
+                    case StateSuperType.Start:
+                        optimizedAutomata.DefineAsStartState(item.Item2.RowLetter.ToString());
                         break;
                     case StateSuperType.End:
                         optimizedAutomata.DefineAsFinalState(item.Item2.RowLetter.ToString());
@@ -87,7 +96,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
                         equivalencyModel.IsStartState = item.Item2.isStartState;
                         equivalencyModel.SubType = item.Item2.SubType;
                         equivalencyModel.SymbolOccurence.Add(item.Item2.DesignatedLetter, 1);
-                        equivalencyModel.SubType = item.Item2.SubType;
+                        equivalencyModel.SuperType = item.Item2.SuperType;
                     }
                     catch (ArgumentException)
                     {
@@ -103,13 +112,14 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
         {
             PartitionTable partitionTable = new PartitionTable(dfa);
             List<Tuple<string, StateEquivalencyModel>> oldModels = new List<Tuple<string, StateEquivalencyModel>>(models);
-            List<Tuple<List<string>, StateEquivalencyModel>> newPairs = new List<Tuple<List<string>, StateEquivalencyModel>>();
+            List<Tuple<Dictionary<string, StateSuperType>, StateEquivalencyModel>> newPairs = new List<Tuple<Dictionary<string, StateSuperType>, StateEquivalencyModel>>();
 
             createNewPartitionPairs(oldModels, ref newPairs);
 
             foreach (var pairs in newPairs)
             {
-                partitionTable.AddRowsToPartitionTable(pairs.Item1, pairs.Item2.SubType, pairs.Item2.SuperType, pairs.Item2.IsStartState, true);
+                // add new rows to new partitionTable
+                partitionTable.AddRowsToPartitionTable(pairs.Item1, pairs.Item2.SubType, pairs.Item2.IsStartState, true);
             }
 
             if (!equivalencyOccured) // this boolean value changes, if no changes have occured, signaling the partition is optimized
@@ -122,12 +132,12 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
             return optimizePartitionTable(partitionTable);
         }
 
-        private int createNewPartitionPairs(List<Tuple<string, StateEquivalencyModel>> eqModels, ref List<Tuple<List<string>, StateEquivalencyModel>> newPairs)
+        private int createNewPartitionPairs(List<Tuple<string, StateEquivalencyModel>> eqModels, ref List<Tuple<Dictionary<string, StateSuperType>, StateEquivalencyModel>> newPairs)
         {
             if (eqModels.Count() > 0)
             {
                 // this list keeps track of which items are identical and should be a new state togethers
-                List<string> newStates = new List<string>();
+                Dictionary<string,StateSuperType> newStates = new Dictionary<string, StateSuperType>();
 
                 // gets a single item which is used to check for duplicate states
                 Tuple<string, StateEquivalencyModel> currentEqModel = eqModels[0];
@@ -138,13 +148,13 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
                 // the models which are marked for removal, after they have been added to the new pairs list
                 List<Tuple<string, StateEquivalencyModel>> modelsToRemove = new List<Tuple<string, StateEquivalencyModel>>(); 
 
-                newStates.Add(currentEqModel.Item1); // add a new state 
+                newStates.Add(currentEqModel.Item1, currentEqModel.Item2.SuperType); // add a new state 
 
                 foreach (var item in eqModels)
                 {
                     if (item.Item2.SymbolOccurence.SequenceEqual(currentEqModel.Item2.SymbolOccurence) && item.Item2.SubType.Equals(currentEqModel.Item2.SubType))
                     {
-                        newStates.Add(item.Item1);
+                        newStates.Add(item.Item1, item.Item2.SuperType);
                         modelsToRemove.Add(item);
                         this.equivalencyOccured = true; // change the boolean to true, to signal an optimization occured
                     }
@@ -156,7 +166,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
                         eqModels.Remove(itemToRemove);
                     }
                 }
-                newPairs.Add(new Tuple<List<string>, StateEquivalencyModel>(newStates, currentEqModel.Item2));
+                newPairs.Add(new Tuple<Dictionary<string, StateSuperType>, StateEquivalencyModel>(newStates, currentEqModel.Item2));
                 createNewPartitionPairs(eqModels, ref newPairs);
                 return 1;
             }

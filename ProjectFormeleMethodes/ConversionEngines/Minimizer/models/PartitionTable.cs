@@ -65,7 +65,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
             return copyOfRows;
         }
 
-        public void AddRowsToPartitionTable(List<string> stateNames, StateSubType subType, StateSuperType superType, bool isStartState, bool allowLetterTick)
+        public void AddRowsToPartitionTable(Dictionary<string, StateSuperType> states, StateSubType subType, bool isStartState, bool allowLetterTick)
         {
             if (allowLetterTick)
             {
@@ -73,15 +73,15 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
             }
 
             PartitionRow pRow;
-            foreach (var state in stateNames)
+            foreach (var state in states)
             {
-                this.StateLetters.Add(new StateLetterModel(state, this.LetterIndex));
-                List<Transition<string>> transitions = this.DFA.GetTransition(state);
+                this.StateLetters.Add(new StateLetterModel(state.Key, this.LetterIndex));
+                List<Transition<string>> transitions = this.DFA.GetTransition(state.Key);
                 foreach (var transition in transitions)
                 {
-                    pRow = new PartitionRow(transition.ToState, transition.Symbol, LetterIndex, isStartState);
-                    pRow.SetStateTypes(subType, superType);
-                    this.Rows.Add(new Tuple<string, PartitionRow>(state, pRow));
+                    pRow = new PartitionRow(transition.ToState, transition.Symbol, LetterIndex);
+                    pRow.SetStateTypes(subType, state.Value);
+                    this.Rows.Add(new Tuple<string, PartitionRow>(state.Key, pRow));
                 }
             }
         }
