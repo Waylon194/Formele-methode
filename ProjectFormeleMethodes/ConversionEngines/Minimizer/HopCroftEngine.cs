@@ -1,15 +1,16 @@
 ﻿using ProjectFormeleMethodes.ConversionEngines.Minimizer.Models;
 using ProjectFormeleMethodes.NDFA;
+using ProjectFormeleMethodes.NDFA.Transitions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
 {
     public class HopcroftEngine
     {
+        bool equivalencyOccured = false;
+
         public Automata<string> MinimizeDFA(Automata<string> dfaToOptimize)
         {
             // create a new dfa object, this is where the DFA ultimately will end up in
@@ -24,26 +25,57 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
             // Create a Partition
             PartitionTable partitionStart = new PartitionTable(dfaToOptimize); // add all the available states to the partition 
             // Assign new pieces to the partition
-            partitionStart.AddRowsToPartitionTable(startStateIds, StateType.Start); // Assign the normal states to a piece
-            partitionStart.AddRowsToPartitionTable(normalStateIds, StateType.Normal); // Assign the normal states to a piece 
-            partitionStart.AddRowsToPartitionTable(endStateIds, StateType.End); // Assign the normal states to a piece 
+            partitionStart.AddRowsToPartitionTable(startStateIds.ToList(), StateSubType.NonEnd, StateSuperType.Start,true, true); // Assign the normal states to a piece, toggle true for changing the letter
+            partitionStart.AddRowsToPartitionTable(normalStateIds.ToList(), StateSubType.NonEnd, StateSuperType.Normal, false, false); // Assign the normal states to a piece, toggle false for keeping the letter
+            partitionStart.AddRowsToPartitionTable(endStateIds.ToList(), StateSubType.End, StateSuperType.End, false, true); // Assign the normal states to a piece, toggle true for changing the letter
 
             partitionStart.SetCorrectDesignatedLetters(); // After filling in the rows, set the rows to their correct designated letter
 
             // the partition is now ready to be used and search for equivalent nodes     
-            // create some variables to prepare optimization
+            var newPTable = optimizePartitionTable(partitionStart);
 
-            var newPTable = OptimizePartitionTable(partitionStart);
-
-            // ** method to create optimal DFA machine **
-            return dfaOptimal;
+            // the partition table is optimized and ready to be used and placed as a new DFA automata model
+            return createAutomataFromPartitionTable(newPTable);
         }
 
-        public PartitionTable OptimizePartitionTable(PartitionTable partitionTable)
+        private Automata<string> createAutomataFromPartitionTable(PartitionTable partitionTable)
         {
-            StateEquivalencyModel equivalencyModel;
-            List<Tuple<string, StateEquivalencyModel>> models = new List<Tuple<string, StateEquivalencyModel>>();
+            // create a new automata object where the new transitions can be placed in
+            Automata<string> optimizedAutomata = new Automata<string>(partitionTable.DFA.Symbols);
 
+            foreach (var item in partitionTable.Rows)
+            {
+                switch (item.Item2.SuperType)
+                {
+                    case StateSuperType.Start: 
+                        if (item.Item2.isStartState)
+                        {
+                            optimizedAutomata.DefineAsStartState(item.Item2.RowLetter.ToString());
+                        }
+                        break;
+                    case StateSuperType.End:
+                        optimizedAutomata.DefineAsFinalState(item.Item2.RowLetter.ToString());
+                        break;
+                    default:
+                        break;
+                }
+                optimizedAutomata.AddTransition(new Transition<string>(item.Item2.RowLetter.ToString(), item.Item2.Symbol, partitionTable.GetCorrectLetterByState(item.Item2.ToState)));
+            }
+            return optimizedAutomata;
+        }
+
+        private PartitionTable optimizePartitionTable(PartitionTable partitionTable)
+        {
+            this.equivalencyOccured = false;
+            var models = createEquivalencyModels(partitionTable);
+            PartitionTable newTable = createNewPartitionTable(models, partitionTable.DFA);
+            return newTable;
+        }
+
+        private List<Tuple<string, StateEquivalencyModel>> createEquivalencyModels(PartitionTable partitionTable)
+        {
+            List<Tuple<string, StateEquivalencyModel>> models = new List<Tuple<string, StateEquivalencyModel>>();
+            StateEquivalencyModel equivalencyModel;
             // Count the amount of letter occurances
             foreach (var state in partitionTable.StateLetters)
             {
@@ -52,60 +84,83 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
                 {
                     try
                     {
+                        equivalencyModel.IsStartState = item.Item2.isStartState;
+                        equivalencyModel.SubType = item.Item2.SubType;
                         equivalencyModel.SymbolOccurence.Add(item.Item2.DesignatedLetter, 1);
+                        equivalencyModel.SubType = item.Item2.SubType;
                     }
-                    catch (ArgumentException )
+                    catch (ArgumentException)
                     {
                         equivalencyModel.SymbolOccurence[item.Item2.DesignatedLetter]++;
                     }
                 }
-                models.Add(new Tuple<string, StateEquivalencyModel>(state.State,equivalencyModel));
+                models.Add(new Tuple<string, StateEquivalencyModel>(state.State, equivalencyModel));
+            }
+            return models;
+        }
+
+        private PartitionTable createNewPartitionTable(List<Tuple<string, StateEquivalencyModel>> models, Automata<string> dfa)
+        {
+            PartitionTable partitionTable = new PartitionTable(dfa);
+            List<Tuple<string, StateEquivalencyModel>> oldModels = new List<Tuple<string, StateEquivalencyModel>>(models);
+            List<Tuple<List<string>, StateEquivalencyModel>> newPairs = new List<Tuple<List<string>, StateEquivalencyModel>>();
+
+            createNewPartitionPairs(oldModels, ref newPairs);
+
+            foreach (var pairs in newPairs)
+            {
+                partitionTable.AddRowsToPartitionTable(pairs.Item1, pairs.Item2.SubType, pairs.Item2.SuperType, pairs.Item2.IsStartState, true);
             }
 
-            PartitionTable newTable = createNewPartitionTable(models);
+            if (!equivalencyOccured) // this boolean value changes, if no changes have occured, signaling the partition is optimized
+            {
+                return partitionTable;
+            }
 
-            return newTable;
+            partitionTable.SetCorrectDesignatedLetters();
+
+            return optimizePartitionTable(partitionTable);
         }
 
-        // TODO check method
-        private void assignEquivalency(List<Tuple<string, StateEquivalencyModel>> oldModels, ref List<List<string>> newPairs)
+        private int createNewPartitionPairs(List<Tuple<string, StateEquivalencyModel>> eqModels, ref List<Tuple<List<string>, StateEquivalencyModel>> newPairs)
         {
-            if (oldModels.Count() > 0)
+            if (eqModels.Count() > 0)
             {
-                List<string> states = new List<string>();
-                Tuple<string, StateEquivalencyModel> checkerModel = oldModels[0];
-                oldModels.Remove(checkerModel);
-                
-                // add the removed state to the states, this state will be used to check if states are equal
-                states.Add(checkerModel.Item1);
+                // this list keeps track of which items are identical and should be a new state togethers
+                List<string> newStates = new List<string>();
 
-                foreach (var item in oldModels)
+                // gets a single item which is used to check for duplicate states
+                Tuple<string, StateEquivalencyModel> currentEqModel = eqModels[0];
+                
+                // remove the currentEqModel from the list, to remove duplicate values
+                eqModels.Remove(currentEqModel);
+
+                // the models which are marked for removal, after they have been added to the new pairs list
+                List<Tuple<string, StateEquivalencyModel>> modelsToRemove = new List<Tuple<string, StateEquivalencyModel>>(); 
+
+                newStates.Add(currentEqModel.Item1); // add a new state 
+
+                foreach (var item in eqModels)
                 {
-                    if (item.Equals(checkerModel))
+                    if (item.Item2.SymbolOccurence.SequenceEqual(currentEqModel.Item2.SymbolOccurence) && item.Item2.SubType.Equals(currentEqModel.Item2.SubType))
                     {
-                        states.Add(item.Item1);
+                        newStates.Add(item.Item1);
+                        modelsToRemove.Add(item);
+                        this.equivalencyOccured = true; // change the boolean to true, to signal an optimization occured
                     }
                 }
-                newPairs.Add(states);
-
-                if (oldModels.Count == 1)
+                if (modelsToRemove.Count() > 0) // if there are entries inside the list, remove all the entries 
                 {
-                    states = new List<string>();
-                    states.Add(oldModels[0].Item1);
+                    foreach (var itemToRemove in modelsToRemove)
+                    {
+                        eqModels.Remove(itemToRemove);
+                    }
                 }
-                assignEquivalency(oldModels, ref newPairs);
-            }            
-        }
-
-        private PartitionTable createNewPartitionTable(List<Tuple<string, StateEquivalencyModel>> models)
-        {
-            PartitionTable partitionTable = null;
-            List<Tuple<string, StateEquivalencyModel>> oldModels = new List<Tuple<string, StateEquivalencyModel>>(models);
-            List<List<string>> newPairs = new List<List<string>>();
-
-            assignEquivalency(models, ref newPairs);
-
-            return partitionTable;
-        }
+                newPairs.Add(new Tuple<List<string>, StateEquivalencyModel>(newStates, currentEqModel.Item2));
+                createNewPartitionPairs(eqModels, ref newPairs);
+                return 1;
+            }
+            return 0;
+        }        
     }
 }

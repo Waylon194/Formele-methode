@@ -23,7 +23,7 @@ namespace ProjectFormeleMethodes
             //Console.WriteLine("Test: " + a.ToString());
 
             HopcroftEngine hopEngine = new HopcroftEngine();
-            hopEngine.MinimizeDFA(a);
+            var b = hopEngine.MinimizeDFA(a);
 
             //HopCroftEngineOld hopEngineold = new HopCroftEngineOld();
             //hopEngineold.MinimizeDFA(a);
@@ -31,7 +31,8 @@ namespace ProjectFormeleMethodes
             //var res = HopCroftAlgor.MinimizeDfa(a);
             Console.WriteLine();
 
-            //GraphVizEngine.PrintGraph(a, "TestGraph");
+            GraphVizEngine.PrintGraph(a, "TestGraph");
+            GraphVizEngine.PrintGraph(b, "TestGraphNew");
 
             //TestRegExpAndThompson();
             //TestLanguage();

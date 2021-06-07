@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
 {
-    public enum StateType
+    public enum StateSubType
     {
-        Start,
-        Normal,
+        NonEnd,
         End
     }
 }

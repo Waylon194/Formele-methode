@@ -20,6 +20,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
             this.Rows = new List<Tuple<string, PartitionRow>>();
             this.StateLetters = new List<StateLetterModel>();
             this.DFA = dfa;
+            this.LetterIndex--; // prepare the letter for use
         }
 
         public List<Tuple<StateLetterModel, char>> GetColumn(char letterToGet, char symbolFilter, string stateToFilter)
@@ -34,6 +35,18 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
                 stateLetter.Add(new Tuple<StateLetterModel, char>(new StateLetterModel(item.Item1, item.Item2.DesignatedLetter), item.Item2.Symbol));
             }
             return stateLetter;
+        }
+
+        public string GetCorrectLetterByState(string state)
+        {
+            foreach (var item in StateLetters)
+            {
+                if (item.State.Equals(state))
+                {
+                    return item.LetterAssigned.ToString();
+                }
+            }
+            return state;
         }
 
         public List<Tuple<string, PartitionRow>> GetRowsByState(char letterToGet, string stateToFilter)
@@ -52,19 +65,13 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
             return copyOfRows;
         }
 
-        public void AddRowsToPartitionTable(SortedSet<string> stateNames, StateType type)
+        public void AddRowsToPartitionTable(List<string> stateNames, StateSubType subType, StateSuperType superType, bool isStartState, bool allowLetterTick)
         {
-            switch (type)
+            if (allowLetterTick)
             {
-                case StateType.Start:
-                case StateType.Normal:
-                    break;
-                case StateType.End:
-                    this.LetterIndex++;
-                    break;
-                default:
-                    break;
+                this.LetterIndex++;
             }
+
             PartitionRow pRow;
             foreach (var state in stateNames)
             {
@@ -72,8 +79,8 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
                 List<Transition<string>> transitions = this.DFA.GetTransition(state);
                 foreach (var transition in transitions)
                 {
-                    pRow = new PartitionRow(transition.ToState, transition.Symbol, LetterIndex);
-                    pRow.SetStateType(type);
+                    pRow = new PartitionRow(transition.ToState, transition.Symbol, LetterIndex, isStartState);
+                    pRow.SetStateTypes(subType, superType);
                     this.Rows.Add(new Tuple<string, PartitionRow>(state, pRow));
                 }
             }

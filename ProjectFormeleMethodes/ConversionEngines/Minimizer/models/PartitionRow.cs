@@ -16,18 +16,22 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
 
         public char DesignatedLetter { get; set; }
 
-        public StateType type { get; private set; }
+        public bool isStartState { get; private set; }
+        public StateSubType SubType { get; private set; }
+        public StateSuperType SuperType { get; private set; }
 
-        public PartitionRow(string tostate, char symbol, char rowLetter)
+        public PartitionRow(string tostate, char symbol, char rowLetter, bool isStartState)
         {
             this.ToState = tostate;
             this.Symbol = symbol;
             this.RowLetter = rowLetter;
+            this.isStartState = isStartState;
         }
 
-        public void SetStateType(StateType type)
+        public void SetStateTypes(StateSubType subType, StateSuperType superType)
         {
-            this.type = type;
+            this.SubType = subType;
+            this.SuperType = superType;
         }
     }
 }
