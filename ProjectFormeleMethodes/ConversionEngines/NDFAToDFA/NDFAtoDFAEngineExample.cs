@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProjectFormeleMethodes.ConversionEngines
 {
-    public class NDFAtoDFAEngine
+    public class NDFAtoDFAEngineExample
     {
         public static Automata<string> Convert(Automata<string> ndfa)
         {
@@ -31,7 +31,6 @@ namespace ProjectFormeleMethodes.ConversionEngines
                     isFinalState = true;
             }
 
-
             //trim last "_" off of string
             combinedStartState = combinedStartState.TrimEnd('_');
             //Start conversion
@@ -39,7 +38,9 @@ namespace ProjectFormeleMethodes.ConversionEngines
             // Define combinedStartState as one and only start state in dfa
             dfa.DefineAsStartState(combinedStartState);
             if (isFinalState)
+            {
                 dfa.DefineAsFinalState(combinedStartState);
+            }
 
             // Add a symbol loop to the failstate if one is created during conversion.
             if (dfa.States.Contains("F"))
@@ -70,13 +71,10 @@ namespace ProjectFormeleMethodes.ConversionEngines
             {
                 finalisedMerge.DefineAsFinalState(finalState.Replace("_", string.Empty));
             }
-
-
             return finalisedMerge;
         }
 
-        private static void RetrieveEpsilonIncludedState(string state, Automata<string> auto,
-            ref SortedSet<string> subStateList)
+        private static void RetrieveEpsilonIncludedState(string state, Automata<string> auto, ref SortedSet<string> subStateList)
         {
             //Add given state to the given substatelist
             subStateList.Add(state);

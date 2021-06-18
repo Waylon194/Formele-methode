@@ -51,7 +51,7 @@ namespace ProjectFormeleMethodes.ConversionEngines
         }
 
         // using the keyword ref to make use of call by reference options in C#
-        public Automata<string> ConvertToDFA(RegExp regularExpression)
+        public Automata<string> ConvertRegExpToDFA(RegExp regularExpression)
         {
             Automata<string> ndfaModel = new Automata<string>();
 
@@ -59,12 +59,12 @@ namespace ProjectFormeleMethodes.ConversionEngines
             // here we create our first blackbox "around" our regular expression
 
             // define start and stop states
-            ndfaModel.DefineAsStartState(STATE_DEFINER_SYMBOL + "S"); // leftState
+            ndfaModel.DefineAsStartState(STATE_DEFINER_SYMBOL + "0"); // leftState
             ndfaModel.DefineAsFinalState(STATE_DEFINER_SYMBOL + "F"); // rightState
             int currentStateCounter = 1; // let the states begin counting from 1. 
 
             // we convert the regular expression step by step to a NDFA, make ndfaModel and stateCounter referable, to make it possible to use a call-by-reference design.
-            convert(regularExpression, ref ndfaModel, ref currentStateCounter, STATE_DEFINER_SYMBOL + "S", STATE_DEFINER_SYMBOL + "F");
+            convert(regularExpression, ref ndfaModel, ref currentStateCounter, STATE_DEFINER_SYMBOL + "0", STATE_DEFINER_SYMBOL + "F");
 
             // add the symbols of the regular expression to the NDFA
             ndfaModel.Symbols = new SortedSet<char>(ndfaModel.Transitions.Distinct().Select(e => e.Symbol).ToList());

@@ -2,6 +2,7 @@
 using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer.Example;
+using ProjectFormeleMethodes.ConversionEngines.NDFAToDFA;
 using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.RegExpressions;
 using ProjectFormeleMethodes.Regular_Expression;
@@ -16,6 +17,32 @@ namespace ProjectFormeleMethodes
         private static List<RegExp> regExps = new List<RegExp>();
 
         public static void Main(string[] args)
+        {
+            RunTest();
+        }
+
+        public static void Testing()
+        {
+            // Testing if the UnionWith methode can merge both SortedSets
+            SortedSet<string> statesPartOne = new SortedSet<string>();
+            statesPartOne.Add("A");
+            statesPartOne.Add("B");
+            statesPartOne.Add("C");
+            statesPartOne.Add("D");
+
+            SortedSet<string> statesPartTwo = new SortedSet<string>();
+            statesPartTwo.Add("A");
+            statesPartTwo.Add("B");
+            statesPartTwo.Add("F");
+            statesPartTwo.Add("E");
+
+            // the answer is yes
+            statesPartOne.UnionWith(statesPartTwo);
+
+            Console.WriteLine();//
+        }
+
+        public static void RunTest()
         {
             RegExp regB, regBaa, regBb;
             regB = new RegExp("b");
@@ -39,22 +66,24 @@ namespace ProjectFormeleMethodes
 
             // Test Thompson Conversion
             // Getting a NDFA model
-            ThompsonEngine thomas = new ThompsonEngine(); 
-            var ndfa = thomas.ConvertToDFA(rexp);
+            ThompsonEngine thomas = new ThompsonEngine();
+            var ndfa = thomas.ConvertRegExpToDFA(rexp);
             //var dnfa =ThompsonConstructionExample.ConvertRegExp(rexp);
 
             // Getting a DFA from a NDFA
-            Automata<string> dfa = NDFAtoDFAEngine.Convert(ndfa); // NDFAtoDFAEngine 
+            //Automata<string> dfa = NDFAtoDFAEngineExample.Convert(ndfa); // NDFAtoDFAEngine Example
+            NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
+            var dfaOpt = toDFAEngine.Convert(ndfa);
 
             // Own Thompson engine
             HopcroftEngine hopEngine = new HopcroftEngine();
-            var optimizedDFAOwn = hopEngine.MinimizeDFA(dfa);
+            var optimizedDFAOwn = hopEngine.MinimizeDFA(dfaOpt);
 
             //var optimizedDFAOwnExample = HopCroftAlgorExample.MinimizeDfa(dfa);
             Console.WriteLine();
 
             GraphVizEngine.PrintGraph(ndfa, "TestGraphNDFA");
-            
+
             //GraphVizEngine.PrintGraph(dfa, "TestGraphPreMinimizedSample");
             //GraphVizEngine.PrintGraph(optimizedDFAOwn, "TestGraphOwnDesignSample");
             //GraphVizEngine.PrintGraph(optimizedDFAOwnExample, "TestGraphExampleSample");
@@ -113,7 +142,7 @@ namespace ProjectFormeleMethodes
 
             // Test Thompson Conversion
             ThompsonEngine thomas = new ThompsonEngine();
-            var o2 = thomas.ConvertToDFA(all);
+            var o2 = thomas.ConvertRegExpToDFA(all);
 
             Console.WriteLine();
         }

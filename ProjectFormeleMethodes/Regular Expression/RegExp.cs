@@ -15,10 +15,10 @@ namespace ProjectFormeleMethodes.RegExpressions
         
         public RegExp Left;
         public RegExp Right;
-        public SortedSet<string> CurrentAcceptedLanguage = null;
         public string CurrentRegularExpression;
 
         // ?
+        public SortedSet<string> CurrentAcceptedLanguage = null;
         public SortedSet<string> CurrentUnacceptedLanguage = null;
 
         // default constructor
@@ -43,6 +43,8 @@ namespace ProjectFormeleMethodes.RegExpressions
 
             // keep track of the current regular expression
             this.CurrentRegularExpression = p;
+
+            
         }
 
         // definitions of the operators
