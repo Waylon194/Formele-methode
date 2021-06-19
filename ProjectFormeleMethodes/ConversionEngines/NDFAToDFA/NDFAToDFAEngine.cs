@@ -11,7 +11,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
     public class NDFAToDFAEngine
     {
         private readonly char EPSILON = 'ɛ';
-        private readonly string EMPTY_STATE_ID = "{ }";
+        private readonly string EMPTY_STATE_ID = "";
 
         public NDFAToDFAEngine()
         {
@@ -30,7 +30,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
             DFAStateTable stateTable = new DFAStateTable();
 
             // we can now use the StateTable to assign the transitions
-            finalizeConversionVers2(hTable, ref dfa);
+            finalizeConversion(hTable, ref dfa);
             return dfa;
         }
 
@@ -113,39 +113,102 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
             return states;
         }
 
-        private void finalizeConversionVers2(NDFAHelperTable helperTable, ref Automata<string> dfa)
+        private void finalizeConversion(NDFAHelperTable helperTable, ref Automata<string> dfa)
         {
-            var allStates = helperTable.GetAllTotalStates();
+            var dfaTable = new Dictionary<string, Dictionary<char, string>>();
 
-            var cpyHelperTable = new NDFAHelperTable(helperTable.HelperTable);
+            var start = helperTable.HelperTable.FirstOrDefault();
 
-            var dfaStateTable = new Dictionary<string, Dictionary<char, SortedSet<string>>>();
+            dfaTable.Add(start.Key, new Dictionary<char, string>());
 
-            string combinedState = "";
 
-            allStates.Remove(EMPTY_STATE_ID);
+            string combinedStates = ""; // keeps track of the combined state
 
-            foreach (var state in allStates)
+            foreach (var allStates in helperTable.GetAllTotalStates())
             {
-                Dictionary<char, SortedSet<string>> sSet = new Dictionary<char, SortedSet<string>>();
-                dfaStateTable.Add(state, new Dictionary<char, SortedSet<string>>());
-                combinedState = "";
-
-                foreach (var item in helperTable.HelperTable)
+                if (!dfaTable.ContainsKey(allStates))
                 {
-                    var tableRow = cpyHelperTable.HelperTable[item.Key];
-
-                    foreach (var smbl in dfa.Symbols)
-                    {
-                        if (!sSet.ContainsKey(smbl))
-                        {
-                            sSet.Add(smbl, new SortedSet<string>());
-                        }
-                        sSet[smbl].UnionWith(tableRow[smbl]);
-                    }
+                    dfaTable.Add(allStates, new Dictionary<char, string>());
                 }
-                dfaStateTable[state] = sSet;
+
+                if (allStates.Equals(EMPTY_STATE_ID))
+                {
+
+                }
+                else
+                {
+                    Dictionary<char, SortedSet<string>> combined = new Dictionary<char, SortedSet<string>>();
+                    Dictionary<char, string> dfaTableData = new Dictionary<char, string>();
+
+                    foreach (var rowInformationFull in helperTable.HelperTable)
+                    {
+                        foreach (var rowStatesInfo in rowInformationFull.Value)
+                        {
+                            if (!dfaTableData.ContainsKey(rowStatesInfo.Key))
+                            {
+                                dfaTableData.Add(rowStatesInfo.Key, "");
+                            }
+                            if (!combined.ContainsKey(rowStatesInfo.Key))
+                            {
+                                combined.Add(rowStatesInfo.Key, new SortedSet<string>());
+                            }
+                            combinedStates = "";
+
+                            combined[rowStatesInfo.Key].UnionWith(rowStatesInfo.Value);                            
+
+                            if (!dfaTable.ContainsKey(combinedStates))
+                            {
+                                dfaTable.Add(combinedStates, new Dictionary<char, string>());
+                            }
+                        }
+                    }
+                    Console.WriteLine();
+                    foreach (var reachableStatesCollection in combined)
+                    {
+                        combinedStates = "";
+                        foreach (var reachableState in reachableStatesCollection.Value)
+                        {
+                            combinedStates += reachableState; // create a string with the values of the collection
+                        }
+
+                        dfaTableData[reachableStatesCollection.Key] = combinedStates; // assign states to the dfaTable row and column
+                    }
+                    dfaTable[allStates] = dfaTableData;
+                }              
             }
+            Console.WriteLine();
+
+            //var allStates = helperTable.GetAllTotalStates();
+
+            //var cpyHelperTable = new NDFAHelperTable(helperTable.HelperTable);
+
+            //var dfaStateTable = new Dictionary<string, Dictionary<char, SortedSet<string>>>();
+
+            //string combinedState = "";
+
+            //allStates.Remove(EMPTY_STATE_ID);
+
+            //foreach (var state in allStates)
+            //{
+            //    Dictionary<char, SortedSet<string>> sSet = new Dictionary<char, SortedSet<string>>();
+            //    dfaStateTable.Add(state, new Dictionary<char, SortedSet<string>>());
+            //    combinedState = "";
+
+            //    foreach (var item in helperTable.HelperTable)
+            //    {
+            //        var tableRow = cpyHelperTable.HelperTable[item.Key];
+
+            //        foreach (var smbl in dfa.Symbols)
+            //        {
+            //            if (!sSet.ContainsKey(smbl))
+            //            {
+            //                sSet.Add(smbl, new SortedSet<string>());
+            //            }
+            //            sSet[smbl].UnionWith(tableRow[smbl]);
+            //        }
+            //    }
+            //    dfaStateTable[state] = sSet;
+            //}
 
             //foreach (var state in allStates)
             //{
@@ -156,7 +219,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
             //        {
             //            if (state.Contains(tableRow.Key))
             //            {
-                            
+
             //            }
             //            else if(state.Equals(EMPTY_STATE_ID))
             //            {
@@ -164,28 +227,8 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
             //            }
             //        }
             //    }
-               
+
             //}
-        }
-
-        private void finalizeConversion(Dictionary<string, Dictionary<char, string>> stateTable, ref Automata<string> dfa)
-        {
-            var allStates = getAllTotalStates(stateTable);
-
-            Dictionary<string, Dictionary<char, string>> optimzedStateTable = new Dictionary<string, Dictionary<char, string>>();
-
-            foreach (var state in allStates)
-            {
-                optimzedStateTable.Add(state, new Dictionary<char, string>()); // add the available state to the dictionary
-
-                foreach (var tableRow in stateTable)
-                {
-                    if (state.Contains(tableRow.Key))
-                    {
-                        
-                    }
-                }
-            }
         }
     }
 }

@@ -9,7 +9,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA.models
 {
     public class NDFAHelperTable
     {
-        //                State,  StateTableRow
+        //                State,   symbol           reachable states
         public Dictionary<string, Dictionary<char, SortedSet<string>>> HelperTable { get; private set; }
 
         public NDFAHelperTable()
