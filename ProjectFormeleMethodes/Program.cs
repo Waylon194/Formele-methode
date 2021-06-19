@@ -19,14 +19,18 @@ namespace ProjectFormeleMethodes
 
         public static void Main(string[] args)
         {
-            var ndfa = GenerateNDFA();
-            GraphVizEngine.PrintGraph(ndfa, "NDFAGraph");
+            //var ndfa = GenerateNDFA();
+            //GraphVizEngine.PrintGraph(ndfa, "NDFAGraph");
 
-            NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
-            var dfaOpt = toDFAEngine.Convert(ndfa);
+            //NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
+            //var dfaOpt = toDFAEngine.Convert(ndfa);
 
-            Console.WriteLine();
-            //RunTest();
+            //Console.WriteLine();
+            ////RunTest();
+            ///
+
+            TestNFA test = new TestNFA();
+            test.Test();
         }
 
         public static void Testing()
@@ -82,7 +86,7 @@ namespace ProjectFormeleMethodes
 
             // Getting a DFA from a NDFA
             //Automata<string> dfa = NDFAtoDFAEngineExample.Convert(ndfa); // NDFAtoDFAEngine Example
-            NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
+            NDFAToDFAEngineOld toDFAEngine = new NDFAToDFAEngineOld(); // NDFAtoDFAEngine 
             var dfaOpt = toDFAEngine.Convert(ndfaForTesting);
 
             // Own Thompson engine
