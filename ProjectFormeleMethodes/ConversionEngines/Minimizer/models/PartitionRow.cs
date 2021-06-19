@@ -16,7 +16,8 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
 
         public char DesignatedLetter { get; set; }
 
-        public bool isStartState { get; private set; }
+        [Obsolete]
+        public bool isStartState { get; private set; } // OBSOLETE
         public StateSubType SubType { get; private set; }
         public StateSuperType SuperType { get; private set; }
 
@@ -25,7 +26,6 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer.Models
             this.ToState = tostate;
             this.Symbol = symbol;
             this.RowLetter = rowLetter;
-            this.isStartState = isStartState;
         }
 
         public void SetStateTypes(StateSubType subType, StateSuperType superType)

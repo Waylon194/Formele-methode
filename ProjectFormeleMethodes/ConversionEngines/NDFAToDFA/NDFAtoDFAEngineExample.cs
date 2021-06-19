@@ -237,7 +237,7 @@ namespace ProjectFormeleMethodes.ConversionEngines
             Automata<string> four = Convert(three);
 
             //return four;
-            return Convert(Reverse(Convert(Reverse(dfa))));
+            return Convert(Reverse(Convert(Reverse(four))));
         }
     }
 }
