@@ -195,7 +195,7 @@ namespace ProjectFormeleMethodes.NDFA
                 {
                     if (!routesPresent.Contains(letter) && !dfa.FinalStates.Contains(state))
                     {
-                        int stateToReturnTo = backTrackForWorkingRoute(chars, letter);
+                        int stateToReturnTo = BackTrackForWorkingRoute(chars, letter);
                         dfa.AddTransition(new Transition<string>(state, letter, ogStates[stateToReturnTo]));
                     }
                 }
@@ -243,7 +243,7 @@ namespace ProjectFormeleMethodes.NDFA
                 {
                     if (!routesPresent.Contains(letter))
                     {
-                        int stateToReturnTo = backTrackForWorkingRoute(chars, letter);
+                        int stateToReturnTo = BackTrackForWorkingRoute(chars, letter);
                         dfa.AddTransition(new Transition<string>(state, letter, ogStates[stateToReturnTo]));
                     }
                 }
