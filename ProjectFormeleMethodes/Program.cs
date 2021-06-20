@@ -3,6 +3,7 @@ using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
 using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
+using ProjectFormeleMethodes.Examples;
 using ProjectFormeleMethodes.RegExpressions;
 using ProjectFormeleMethodes.Regular_Expression;
 using System;
@@ -16,6 +17,7 @@ namespace ProjectFormeleMethodes
 
         private static RegExp baa, bb, baaOrbb, baaOrbborEp, regPlus, all, a, b, regStar;
         private static List<RegExp> regExps = new List<RegExp>();
+        private static GraphVizEngine graphVizEngine;
 
         public static void Main(string[] args)
         {
@@ -25,13 +27,13 @@ namespace ProjectFormeleMethodes
             //NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
             //var dfaOpt = toDFAEngine.Convert(ndfa);
 
+            //NDFA test
             //GraphVizEngine.PrintGraph(dfaOpt, "NDFAToDFAGraph");
-
-            
+            //DFA test
+            //GraphVizEngine.PrintGraph(DFABuilder.BuildDFASampleOne(), "DFABuildertest");
 
             Console.WriteLine();
             RunConversionTestFull();
-            
 
             //TestNFA test = new TestNFA();
             //test.Test();
