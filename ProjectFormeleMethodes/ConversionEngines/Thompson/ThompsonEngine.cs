@@ -51,7 +51,7 @@ namespace ProjectFormeleMethodes.ConversionEngines
         }
 
         // using the keyword ref to make use of call by reference options in C#
-        public Automata<string> ConvertRegExpToDFA(RegExp regularExpression)
+        public Automata<string> ConvertRegExpToNDFA(RegExp regularExpression)
         {
             Automata<string> ndfaModel = new Automata<string>();
 

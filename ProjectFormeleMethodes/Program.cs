@@ -1,6 +1,7 @@
 ﻿// Our own usables
 using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
+using ProjectFormeleMethodes.Examples;
 using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.RegExpressions;
@@ -13,9 +14,6 @@ namespace ProjectFormeleMethodes
     public class Program
     {
         private static bool GraphVizEngineTOGGLE = false;
-
-        private static RegExp baa, bb, baaOrbb, baaOrbborEp, regPlus, all, a, b, regStar;
-        private static List<RegExp> regExps = new List<RegExp>();
 
         public static void Main(string[] args)
         {
@@ -58,27 +56,14 @@ namespace ProjectFormeleMethodes
             Console.WriteLine();//
         }
 
-        public static RegExp BuildCustomRegExp(string regex)
-        {
-            return StringToRegExpBuilder.StringToRegex(regex, new RegExp());
-        }
-
         public static void RunConversionTestFull()
-        {
-            RegExp rexp = new RegExp("a");
-            RegExp b = new RegExp("b");
-            rexp = rexp.Or(b).Plus();
-
-            // (a | b)+
-            rexp.PrintRegularExpression();
-
-            var rxp = BuildCustomRegExp("(a|b)+");
+        {          
 
             // Test Thompson Conversion
             // Getting a NDFA model
             ThompsonEngine thomas = new ThompsonEngine();
-            var thompsonNdfa = thomas.ConvertRegExpToDFA(rxp);
-            GraphVizEngine.PrintGraph(thompsonNdfa, "ThompsonEngineConversion");
+
+            GraphVizEngine.PrintGraph(DFABuilder.BuildDFASampleOne(), "ThompsonEngineConversion");
 
             // Test NDFAToDFA
             // Getting a DFA from a NDFA
@@ -97,68 +82,9 @@ namespace ProjectFormeleMethodes
             }
         }
 
-        public static Automata<string> GenerateNDFA()
+        private static Automata<string> NDFABuilder()
         {
-            Automata<string> ndfa = new Automata<string>();
-            ndfa.Symbols.Add('a'); 
-            ndfa.Symbols.Add('b'); 
-
-            ndfa.DefineAsStartState("q0");
-            ndfa.DefineAsFinalState("qF");
-
-            // transitions of first state
-            ndfa.AddTransition(new Transition<string>("q0", 'a', "q1"));
-            ndfa.AddTransition(new Transition<string>("q0", 'a', "q2"));
-            ndfa.AddTransition(new Transition<string>("q0", 'b', "q3"));
-
-            // transitions of second state
-            ndfa.AddTransition(new Transition<string>("q1", 'a', "q2"));
-            ndfa.AddTransition(new Transition<string>("q1", 'b', "q0"));
-            ndfa.AddTransition(new Transition<string>("q1", 'ɛ', "q2"));
-
-            // transitions of third state
-            ndfa.AddTransition(new Transition<string>("q2", 'a', "q2"));
-            ndfa.AddTransition(new Transition<string>("q2", 'ɛ', "q3"));
-            ndfa.AddTransition(new Transition<string>("q2", 'a', "qF"));
-
-            // transitions of fourth state
-            ndfa.AddTransition(new Transition<string>("q3", 'a', "qF"));
-
-            // transitions of final state
-            ndfa.AddTransition(new Transition<string>("qF", 'a', "q3"));
-
-            return ndfa;
-        }
-
-        public static void TestRegExpAndThompson()
-        {
-            a = new RegExp("a");
-            b = new RegExp("b");
-
-            // expr1: "baa"
-            baa = new RegExp("baa");
-
-            // expr2: "bb"
-            bb = new RegExp("bb");
-
-            // expr3: "(baa | bb)"
-            baaOrbb = baa.Or(bb);
-
-            // expr4: "(baa | bb | ɛ)"
-            //baaOrbborEp = baaOrbb.AndOr(new RegExp());
-
-            // expr5: "(a|b)*"
-            regStar = (a.Or(b)).Star();
-
-            // expr6: "(baa | bb)+"
-            regPlus = baaOrbb.Plus();
-
-            // all: "(baa | bb)+ ⋅ (a|b)*"
-            all = regPlus.Dot(regStar);
-
-            all.PrintRegularExpression();
-
-            TestLanguage();
+            throw new NotImplementedException();
         }
 
         public static void TestLanguage(RegExp exp = null)
