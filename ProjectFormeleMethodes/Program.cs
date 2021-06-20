@@ -9,27 +9,25 @@ namespace ProjectFormeleMethodes
     public class Program
     {
         private static bool GraphVizEngineTOGGLE = false;
-        private static Tester tester = new Tester();
+        private static TesterContainer testerUtil = new TesterContainer();
 
         public static void Main(string[] args)
         {
+            //var normal = DFABuilder.BuildDFASampleOne();
+            //var flipped = testerUtil.CreateNotVariantOfAutomata(normal);
+
+            Console.WriteLine();
+
             var result = ConsoleBuilderSelecterTest();
-            ConsoleExecute(result.Item2, result.Item1);
+
+            if (result != null)
+            {
+                ConsoleExecute(result.Item2, result.Item1);
+            }
         }
 
         public static RegExp CreateRegExp(int choice, string regexp = "")
         {
-            Console.WriteLine("RegExp");
-            Console.WriteLine("Welke optie?");
-            Console.WriteLine("1: RegExp sample 1");
-            Console.WriteLine("2: RegExp sample 2");
-            Console.WriteLine("3: RegExp custom");
-            Console.WriteLine("-1: Stoppen\n");
-
-            Console.Write("=>> ");
-            int value = -1;
-            int.TryParse(Console.ReadLine(), out value);
-
             switch (choice)
             {
                 case 1:
@@ -48,18 +46,6 @@ namespace ProjectFormeleMethodes
 
         public static Automata<string> CreateNDFA(int choice)
         {
-            Console.WriteLine("NDFABuilder");
-            Console.WriteLine("Welke optie?");
-            Console.WriteLine("1: NDFA sample 1");
-            Console.WriteLine("2: NDFA sample 2");
-            Console.WriteLine("3: NDFA sample 3");
-            Console.WriteLine("4: NDFA sample 4");
-            Console.WriteLine("-1: Stoppen\n");
-
-            Console.Write("=>> ");
-            int value = -1;
-            int.TryParse(Console.ReadLine(), out value);
-
             switch (choice)
             {
                 case 1:
@@ -81,17 +67,6 @@ namespace ProjectFormeleMethodes
 
         public static Automata<string> CreateDFA(int choice)
         {
-            Console.WriteLine("DFABuilder");
-            Console.WriteLine("Welke optie?");
-            Console.WriteLine("1: DFA sample 1");
-            Console.WriteLine("2: DFA sample 2");
-            Console.WriteLine("3: DFA sample 3");
-            Console.WriteLine("-1: Stoppen\n");
-
-            Console.Write("=>> ");
-            int value = -1;
-            int.TryParse(Console.ReadLine(), out value);
-
             switch (choice)
             {
                 case 1:
@@ -116,7 +91,8 @@ namespace ProjectFormeleMethodes
             Console.WriteLine("1: RegExp->NDFA");
             Console.WriteLine("2: RegExp->NDFA->DFA");
             Console.WriteLine("3: RegExp->NDFA->DFA->Minimaliseren");
-            Console.WriteLine("-1: Stoppen\n");
+            Console.WriteLine("-1: Stoppen");
+            Console.WriteLine("0: Terug\n");
 
             Console.Write("=>> ");
             int value = -1;
@@ -126,35 +102,44 @@ namespace ProjectFormeleMethodes
             {
                 case 1: // RegExp -> NDFA
                         // Convert Regexp to NDFA via Thompson
-                    var ndfa = tester.ConvertRegExpToNDFA(regExp);
+                    var ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
                     GraphVizEngine.PrintGraph(ndfa, "RegExpThompsonConvertedNDFAOption1");
                     break;
 
                 case 2: // RegExp -> NDFA -> DFA
                         // Convert Regexp to NDFA via Thompson
-                    ndfa = tester.ConvertRegExpToNDFA(regExp);
+                    ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
                     // Convert NDFA to DFA
-                    var dfa = tester.ConvertNDFAToDFA(ndfa);
+                    var dfa = testerUtil.ConvertNDFAToDFA(ndfa);
                     GraphVizEngine.PrintGraph(dfa, "RegExpNDFAConvertedDFAOption2");
                     break;
 
                 case 3: // RegExp -> NDFA -> DFA -> Minimaliseren
                         // Convert Regexp to NDFA via Thompson
-                    ndfa = tester.ConvertRegExpToNDFA(regExp);
+                    ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
                     // Convert NDFA to DFA
-                    dfa = tester.ConvertNDFAToDFA(ndfa);
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfa);
                     // Minimize DFA
-                    dfa = tester.MinimizeDFA(dfa);
+                    dfa = testerUtil.MinimizeDFA(dfa);
                     GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAOption3");
+                    break;
+
+                // stoppen
+                case -1:
+                    break;
+
+                    // terug
+                case 0:
+                    ConsoleBuilderSelecterTest();
                     break;
 
                 default: // RegExp -> NDFA -> DFA -> Minimaliseren - Default
                          // Convert Regexp to NDFA via Thompson
-                    ndfa = tester.ConvertRegExpToNDFA(regExp);
+                    ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
                     // Convert NDFA to DFA
-                    dfa = tester.ConvertNDFAToDFA(ndfa);
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfa);
                     // Minimize DFA
-                    dfa = tester.MinimizeDFA(dfa);
+                    dfa = testerUtil.MinimizeDFA(dfa);
                     GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAOptionDEFAULT");
                     break;
             }
@@ -166,7 +151,8 @@ namespace ProjectFormeleMethodes
             Console.WriteLine("Welke optie?");
             Console.WriteLine("1: DFA->Minimaliseren");
             Console.WriteLine("2: Adjust DFA");
-            Console.WriteLine("-1: Stoppen\n");
+            Console.WriteLine("-1: Stoppen");
+            Console.WriteLine("0: Terug\n");
 
             Console.Write("=>> ");
             int value = -1;
@@ -176,7 +162,7 @@ namespace ProjectFormeleMethodes
             {
                 case 1:
                     // Minimize DFA
-                    var dfa = tester.MinimizeDFA(dfaGiven);
+                    var dfa = testerUtil.MinimizeDFA(dfaGiven);
                     GraphVizEngine.PrintGraph(dfa, "DFAMinimizedDFAOption1");
                     break;
 
@@ -184,8 +170,17 @@ namespace ProjectFormeleMethodes
                     // TODO
                     break;
 
+                // stoppen
+                case -1:
+                    break;
+
+                    // terug 
+                case 0:
+                    ConsoleBuilderSelecterTest();
+                    break;
+
                 default:  // Minimize DFA - Default
-                    dfa = tester.MinimizeDFA(dfaGiven);
+                    dfa = testerUtil.MinimizeDFA(dfaGiven);
                     GraphVizEngine.PrintGraph(dfa, "DFAMinimizedDFAOption1");
                     break;
             }
@@ -198,7 +193,8 @@ namespace ProjectFormeleMethodes
             Console.WriteLine("1: NDFA->DFA");
             Console.WriteLine("2: NDFA->DFA->Minimaliseren");
             Console.WriteLine("3: Adjust DFA");
-            Console.WriteLine("-1: Stoppen\n");
+            Console.WriteLine("-1: Stoppen");
+            Console.WriteLine("0: Terug\n");
 
             Console.Write("=>> ");
             int value = -1;
@@ -208,15 +204,15 @@ namespace ProjectFormeleMethodes
             {
                 case 1: // NDFA -> DFA                    
                     // Convert NDFA to DFA
-                    var dfa = tester.ConvertNDFAToDFA(ndfaGiven);
+                    var dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
                     GraphVizEngine.PrintGraph(dfa, "NDFANDFAConvertedDFAOption1");
                     break;
 
                 case 2: // NDFA -> DFA -> Minimaliseren
                     // Convert NDFA to DFA
-                    dfa = tester.ConvertNDFAToDFA(ndfaGiven);
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
                     // Minimize DFA
-                    dfa = tester.MinimizeDFA(dfa);
+                    dfa = testerUtil.MinimizeDFA(dfa);
                     GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedDFAOption2");
                     break;
 
@@ -224,11 +220,19 @@ namespace ProjectFormeleMethodes
                     // TODO
                     break;
 
+                    // stoppen
+                case -1:
+                    break;
+
+                case 0:
+                    ConsoleBuilderSelecterTest();
+                    break;
+
                 default:  // Minimize DFA - Default
                     // Convert NDFA to DFA
-                    dfa = tester.ConvertNDFAToDFA(ndfaGiven);
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
                     // Minimize DFA
-                    dfa = tester.MinimizeDFA(dfa);
+                    dfa = testerUtil.MinimizeDFA(dfa);
                     GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedDFAOption2");
                     break;
             }
@@ -278,7 +282,8 @@ namespace ProjectFormeleMethodes
                     Console.WriteLine("Welke optie?");
                     Console.WriteLine("1: Sample 1");
                     Console.WriteLine("2: Sample 2");
-                    Console.WriteLine("3: Eigen maken\n");
+                    Console.WriteLine("3: Eigen maken");
+                    Console.WriteLine("0: Terug\n");
 
                     Console.Write("=>> ");
                     value = -1;
@@ -296,9 +301,15 @@ namespace ProjectFormeleMethodes
                             string input = Console.ReadLine();
                             return new Tuple<bool, dynamic>(false, CreateRegExp(value, input));
 
+                            // Terug
+                        case 0:
+                            ConsoleBuilderSelecterTest();
+                            break;
+
                         default:
                             return new Tuple<bool, dynamic>(false, CreateRegExp(-1)); // back to default        
                     }
+                    break;
 
                 case 2: // NDFA expressies
                     Console.WriteLine("\nNDFA Expressies: ");
@@ -306,7 +317,8 @@ namespace ProjectFormeleMethodes
                     Console.WriteLine("1: Sample 1");
                     Console.WriteLine("2: Sample 2");
                     Console.WriteLine("3: Sample 3");
-                    Console.WriteLine("4: Sample 4\n");
+                    Console.WriteLine("4: Sample 4");
+                    Console.WriteLine("0: Terug\n");
 
                     Console.Write("=>> ");
                     value = -1;
@@ -329,18 +341,24 @@ namespace ProjectFormeleMethodes
                         case 4:
                             return new Tuple<bool, dynamic>(true, CreateNDFA(value));
 
+                        // Terug
+                        case 0:
+                            ConsoleBuilderSelecterTest();
+                            break;
 
                         default:
                             return new Tuple<bool, dynamic>(true, CreateNDFA(-1)); // back to default 
 
                     }
+                    break;
 
                 case 3: // DFA expressies
                     Console.WriteLine("\nDFA Expressies: ");
                     Console.WriteLine("Welke optie?");
                     Console.WriteLine("1: Sample 1");
                     Console.WriteLine("2: Sample 2");
-                    Console.WriteLine("3: Sample 3\n");
+                    Console.WriteLine("3: Sample 3");
+                    Console.WriteLine("3: Terug\n");
 
                     Console.Write("=>> ");
                     value = -1;
@@ -357,9 +375,15 @@ namespace ProjectFormeleMethodes
                         case 3:
                             return new Tuple<bool, dynamic>(false, CreateDFA(value));
 
+                        // Terug
+                        case 0:
+                            ConsoleBuilderSelecterTest();
+                            break;
+
                         default:
                             return new Tuple<bool, dynamic>(false, CreateDFA(-1)); // back to default 
                     }
+                    break;
 
                 case -1:
                     // stoppen met de loop

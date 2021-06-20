@@ -7,7 +7,7 @@ using System;
 
 namespace ProjectFormeleMethodes
 {
-    public class Tester
+    public class TesterContainer
     {
         public Automata<string> ConvertRegExpToNDFA(RegExp regx)
         {
@@ -30,11 +30,16 @@ namespace ProjectFormeleMethodes
             return converter.MinimizeDFA(dfa);
         }
 
-        public static void TestRegExpLanguage(RegExp exp)
+        public void TestRegExpLanguage(RegExp exp)
         {
             // create a new logic manipulator object
             RegExpLogicOperator rLogic = new RegExpLogicOperator();
             Console.WriteLine("taal van (baa):\n" + rLogic.getAcceptedLanguages(exp, 5));
+        }
+
+        public Automata<string> CreateNotVariantOfAutomata(Automata<string> toFlip)
+        {
+            return Automata<string>.CreateNotVariant(toFlip);
         }
     }
 }

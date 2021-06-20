@@ -107,7 +107,7 @@ namespace ProjectFormeleMethodes.NDFA
             return transitions;
         }
 
-        private static void BeginsWith(DfaGenerateValue param, ref Automata<string> dfa)
+        private static void CreateBeginsWithAutomataByReference(DfaGenerateValue param, ref Automata<string> dfa)
         {
             char[] chars = param.Parameter.ToCharArray();
             int stateCounter = 0;
@@ -127,11 +127,7 @@ namespace ProjectFormeleMethodes.NDFA
             }
 
             //Hardcopy states
-            SortedSet<string> ogStates = new SortedSet<string>();
-            foreach (string state in dfa.States)
-            {
-                ogStates.Add(state);
-            }
+            SortedSet<string> ogStates = new SortedSet<string>(dfa.States);
 
             foreach (string state in ogStates)
             {
@@ -160,7 +156,7 @@ namespace ProjectFormeleMethodes.NDFA
             }
         }
 
-        private static void Contains(DfaGenerateValue param, ref Automata<string> dfa)
+        private static void CreateContainsAutomataByReference(DfaGenerateValue param, ref Automata<string> dfa)
         {
             char[] chars = param.Parameter.ToCharArray();
             int stateCounter = 0;
@@ -175,15 +171,10 @@ namespace ProjectFormeleMethodes.NDFA
             dfa.DefineAsFinalState(stateCounter.ToString());
 
             //Hardcopy states
-            List<string> ogStates = new List<string>();
-            foreach (string state in dfa.States)
-            {
-                ogStates.Add(state);
-            }
+            List<string> ogStates = new List<string>(dfa.States);
 
-            for (int i = 0; i < ogStates.Count; i++)
+            foreach (var state in ogStates)
             {
-                string state = ogStates[i];
                 List<Transition<string>> trans = dfa.GetTransition(state);
                 SortedSet<char> routesPresent = new SortedSet<char>();
                 foreach (Transition<string> t in trans)
@@ -208,7 +199,7 @@ namespace ProjectFormeleMethodes.NDFA
             }
         }
 
-        private static void EndsWith(DfaGenerateValue param, ref Automata<string> dfa)
+        private static void CreateEndsWithAutomataByReference(DfaGenerateValue param, ref Automata<string> dfa)
         {
             char[] chars = param.Parameter.ToCharArray();
             int stateCounter = 0;
@@ -223,18 +214,13 @@ namespace ProjectFormeleMethodes.NDFA
 
             dfa.DefineAsFinalState(stateCounter.ToString());
             //Hardcopy states
-            List<string> ogStates = new List<string>();
-            foreach (string state in dfa.States)
-            {
-                ogStates.Add(state);
-            }
+            List<string> ogStates = new List<string>(dfa.States);
 
-            for (int i = 0; i < ogStates.Count; i++)
+            foreach (var state in ogStates)
             {
-                string state = ogStates[i];
-                List<Transition<string>> trans = dfa.GetTransition(state);
+                List<Transition<string>> transition = dfa.GetTransition(state);
                 SortedSet<char> routesPresent = new SortedSet<char>();
-                foreach (Transition<string> t in trans)
+                foreach (Transition<string> t in transition)
                 {
                     routesPresent.Add(t.Symbol);
                 }
@@ -271,24 +257,23 @@ namespace ProjectFormeleMethodes.NDFA
             return -1;
         }
 
-        public static Automata<string> Not(Automata<string> automaat)
+        // Flips the whole NDFA/DFA to create the opposite, of NOT version
+        public static Automata<string> CreateNotVariant(Automata<string> automataToFlip)
         {
-            Automata<string> notAutomaat = new Automata<string>(automaat.Symbols);
-            //save way of copying transitions
-            notAutomaat.StartStates = automaat.StartStates;
-            foreach (Transition<string> t in automaat.Transitions)
-            {
-                notAutomaat.AddTransition(t);
-            }
+            Automata<string> flippedAutomata = new Automata<string>(automataToFlip.Symbols);
 
-            foreach (string state in notAutomaat.States)
+            // create a copy of the data
+            flippedAutomata.StartStates = automataToFlip.StartStates;
+            flippedAutomata.Transitions.UnionWith(automataToFlip.Transitions); 
+
+            foreach (string state in flippedAutomata.States)
             {
-                if (!automaat.FinalStates.Contains(state))
+                if (!automataToFlip.FinalStates.Contains(state))
                 {
-                    notAutomaat.DefineAsFinalState(state);
+                    flippedAutomata.DefineAsFinalState(state);
                 }
             }
-            return notAutomaat;
+            return flippedAutomata;
         }
 
         public enum GeneratorType
