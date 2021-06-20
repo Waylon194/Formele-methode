@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ProjectFormeleMethodes.NDFA.Transitions;
 using System.Linq;
+using ProjectFormeleMethodes.ConversionEngines;
 
 namespace ProjectFormeleMethodes.NDFA
 {
@@ -107,187 +108,33 @@ namespace ProjectFormeleMethodes.NDFA
             return transitions;
         }
 
-        private static void CreateBeginsWithAutomataByReference(DfaGenerateValue param, ref Automata<string> dfa)
+        public Automata<string> MinimizeDFAReversedAlgorithm(Automata<string> dfa)
         {
-            char[] chars = param.Parameter.ToCharArray();
-            int stateCounter = 0;
-            dfa.DefineAsStartState(stateCounter.ToString());
-            foreach (char c in chars)
-            {
-                dfa.AddTransition(new Transition<string>(stateCounter.ToString(), c,
-                    (stateCounter + 1).ToString()));
+            NDFAToDFAEngine engine = new NDFAToDFAEngine();
 
-                stateCounter = dfa.States.Count - 1;
-            }
+            Automata<string> one = CreateReversedVariant(dfa);
+            Automata<string> two = engine.Convert(one);
+            Automata<string> three = CreateReversedVariant(two);
+            Automata<string> four = engine.Convert(three);
 
-            dfa.DefineAsFinalState(stateCounter.ToString());
-            foreach (char c in dfa.Symbols)
-            {
-                dfa.AddTransition(new Transition<string>(stateCounter.ToString(), c, stateCounter.ToString()));
-            }
-
-            //Hardcopy states
-            SortedSet<string> ogStates = new SortedSet<string>(dfa.States);
-
-            foreach (string state in ogStates)
-            {
-                List<Transition<string>> trans = dfa.GetTransition(state);
-                SortedSet<char> routesPresent = new SortedSet<char>();
-                foreach (Transition<string> t in trans)
-                {
-                    routesPresent.Add(t.Symbol);
-                }
-
-                foreach (char letter in dfa.Symbols)
-                {
-                    if (!routesPresent.Contains(letter))
-                    {
-                        dfa.AddTransition(new Transition<string>(state, letter, "F"));
-                    }
-                }
-            }
-
-            if (dfa.States.Contains("F"))
-            {
-                foreach (char letter in dfa.Symbols)
-                {
-                    dfa.AddTransition(new Transition<string>("F", letter, "F"));
-                }
-            }
-        }
-
-        private static void CreateContainsAutomataByReference(DfaGenerateValue param, ref Automata<string> dfa)
-        {
-            char[] chars = param.Parameter.ToCharArray();
-            int stateCounter = 0;
-            dfa.DefineAsStartState(stateCounter.ToString());
-            foreach (char c in chars)
-            {
-                dfa.AddTransition(new Transition<string>(stateCounter.ToString(), c,
-                    (stateCounter + 1).ToString()));
-                stateCounter = dfa.States.Count - 1;
-            }
-
-            dfa.DefineAsFinalState(stateCounter.ToString());
-
-            //Hardcopy states
-            List<string> ogStates = new List<string>(dfa.States);
-
-            foreach (var state in ogStates)
-            {
-                List<Transition<string>> trans = dfa.GetTransition(state);
-                SortedSet<char> routesPresent = new SortedSet<char>();
-                foreach (Transition<string> t in trans)
-                {
-                    routesPresent.Add(t.Symbol);
-                }
-
-                foreach (char letter in dfa.Symbols)
-                {
-                    if (!routesPresent.Contains(letter) && !dfa.FinalStates.Contains(state))
-                    {
-                        int stateToReturnTo = BackTrackForWorkingRoute(chars, letter);
-                        dfa.AddTransition(new Transition<string>(state, letter, ogStates[stateToReturnTo]));
-                    }
-                }
-            }
-
-            foreach (char c in dfa.Symbols)
-            {
-                foreach (string finalstate in dfa.FinalStates)
-                    dfa.AddTransition(new Transition<string>(stateCounter.ToString(), c, stateCounter.ToString()));
-            }
-        }
-
-        private static void CreateEndsWithAutomataByReference(DfaGenerateValue param, ref Automata<string> dfa)
-        {
-            char[] chars = param.Parameter.ToCharArray();
-            int stateCounter = 0;
-            dfa.DefineAsStartState(stateCounter.ToString());
-            foreach (char c in chars)
-            {
-                dfa.AddTransition(new Transition<string>(stateCounter.ToString(), c,
-                    (stateCounter + 1).ToString()));
-
-                stateCounter = dfa.States.Count - 1;
-            }
-
-            dfa.DefineAsFinalState(stateCounter.ToString());
-            //Hardcopy states
-            List<string> ogStates = new List<string>(dfa.States);
-
-            foreach (var state in ogStates)
-            {
-                List<Transition<string>> transition = dfa.GetTransition(state);
-                SortedSet<char> routesPresent = new SortedSet<char>();
-                foreach (Transition<string> t in transition)
-                {
-                    routesPresent.Add(t.Symbol);
-                }
-
-                foreach (char letter in dfa.Symbols)
-                {
-                    if (!routesPresent.Contains(letter))
-                    {
-                        int stateToReturnTo = BackTrackForWorkingRoute(chars, letter);
-                        dfa.AddTransition(new Transition<string>(state, letter, ogStates[stateToReturnTo]));
-                    }
-                }
-            }
-        }
-
-        private static int BackTrackForWorkingRoute(char[] route, char toUse)
-        {
-            string completeRoute = new string(route);
-
-            for (int i = route.Length - 1; i >= 0; i--)
-            {
-                string tobeAdded = "";
-                for (int j = i; j < route.Length; j++)
-                {
-                    tobeAdded += route[j];
-                }
-
-                string routeTocheck = (toUse.ToString() + tobeAdded);
-                if (routeTocheck.Contains(completeRoute))
-                {
-                    return i;
-                }
-            }
-            return -1;
+            //return reversed;
+            return engine.Convert(
+                CreateReversedVariant(
+                    engine.Convert(
+                        CreateReversedVariant(four))));
         }
 
         // Flips the whole NDFA/DFA to create the opposite, of NOT version
-        public static Automata<string> CreateNotVariant(Automata<string> automataToFlip)
+        public static Automata<string> CreateReversedVariant(Automata<string> automataToFlip)
         {
-            Automata<string> flippedAutomata = new Automata<string>(automataToFlip.Symbols);
-
-            // create a copy of the data
-            flippedAutomata.StartStates = automataToFlip.StartStates;
-            flippedAutomata.Transitions.UnionWith(automataToFlip.Transitions); 
-
-            foreach (string state in flippedAutomata.States)
+            Automata<string> reverseAutomata = new Automata<string>(automataToFlip.Symbols);
+            foreach (Transition<string> transition in automataToFlip.Transitions)
             {
-                if (!automataToFlip.FinalStates.Contains(state))
-                {
-                    flippedAutomata.DefineAsFinalState(state);
-                }
+                reverseAutomata.AddTransition(new Transition<string>(transition.ToState, transition.Symbol, transition.FromState));
             }
-            return flippedAutomata;
-        }
-
-        public enum GeneratorType
-        {
-            BeginsWith,
-            Contains,
-            EndsWith
-        }
-
-        public struct DfaGenerateValue
-        {
-            public bool IsNot;
-            public string Parameter;
-            public GeneratorType Type;
+            reverseAutomata.StartStates = automataToFlip.FinalStates;
+            reverseAutomata.FinalStates = automataToFlip.StartStates;
+            return reverseAutomata;
         }
     }
 }

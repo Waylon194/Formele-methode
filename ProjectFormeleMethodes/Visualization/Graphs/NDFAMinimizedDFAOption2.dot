@@ -1,1 +1,0 @@
-digraph{ { node[style = invis, shape = none, label = " ", width = 0, height = 0] SSS } node [shape = doublecircle]; B ;  node [shape = circle]; SSS-> A A -> A [ label = "a" ]; A -> B [ label = "a" ]; A -> A [ label = "b" ]; A -> B [ label = "b" ]; B -> B [ label = "a" ]; B -> A [ label = "b" ]; B -> B [ label = "b" ]; }
