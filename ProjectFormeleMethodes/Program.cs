@@ -148,7 +148,7 @@ namespace ProjectFormeleMethodes
                 case 1:
                     // Minimize DFA
                     var dfa = tester.MinimizeDFA(dfaGiven);
-                    GraphVizEngine.PrintGraph(dfa, "DFA : Minimized DFA - Option 1");
+                    GraphVizEngine.PrintGraph(dfa, "DFAMinimizedDFAOption1");
                     break;
 
                 case 2: // Adjust DFA
@@ -158,7 +158,7 @@ namespace ProjectFormeleMethodes
 
                 default:  // Minimize DFA - Default
                     dfa = tester.MinimizeDFA(dfaGiven);
-                    GraphVizEngine.PrintGraph(dfa, "DFA : Minimized DFA - Option 1");
+                    GraphVizEngine.PrintGraph(dfa, "DFAMinimizedDFAOption1");
                     break;
             }
         }
@@ -181,7 +181,7 @@ namespace ProjectFormeleMethodes
                 case 1: // NDFA -> DFA                    
                     // Convert NDFA to DFA
                     var dfa = tester.ConvertNDFAToDFA(ndfaGiven);
-                    GraphVizEngine.PrintGraph(dfa, "NDFA : NDFAConvertedDFA - Option 1");
+                    GraphVizEngine.PrintGraph(dfa, "NDFANDFAConvertedDFAOption1");
                     break;
 
                 case 2: // NDFA -> DFA -> Minimaliseren
@@ -189,7 +189,7 @@ namespace ProjectFormeleMethodes
                     dfa = tester.ConvertNDFAToDFA(ndfaGiven);
                     // Minimize DFA
                     dfa = tester.MinimizeDFA(dfa);
-                    GraphVizEngine.PrintGraph(dfa, "NDFA : Minimized DFA - Option 2");
+                    GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedDFAOption2");
                     break;
 
                 case 3: // Adjust NDFA
@@ -202,7 +202,7 @@ namespace ProjectFormeleMethodes
                     dfa = tester.ConvertNDFAToDFA(ndfaGiven);
                     // Minimize DFA
                     dfa = tester.MinimizeDFA(dfa);
-                    GraphVizEngine.PrintGraph(dfa, "NDFA : Minimized DFA - Option 2");
+                    GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedDFAOption2");
                     break;
             }
         }
