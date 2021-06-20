@@ -6,8 +6,8 @@ namespace ProjectFormeleMethodes.Examples
     public class DFABuilder
     {
         //Alfabets
-        char[] alphabetAB = { 'a', 'b' };
-        char[] alphabetXY = { 'x', 'y' };
+        static char[] alphabetAB = { 'a', 'b' };
+        static char[] alphabetXY = { 'x', 'y' };
 
         public static Automata<string> BuildDFASampleOne()
         {
@@ -44,28 +44,28 @@ namespace ProjectFormeleMethodes.Examples
             //Tweede alfabet
             Automata<string> n = new Automata<string>(alphabetAB);
 
-            m.AddTransition(new Transition<string>("q0", 'a', "q2"));
-            m.AddTransition(new Transition<string>("q0", 'b', "q3"));
+            n.AddTransition(new Transition<string>("q0", 'a', "q2"));
+            n.AddTransition(new Transition<string>("q0", 'b', "q3"));
 
-            m.AddTransition(new Transition<string>("q3", 'a', "q2"));
-            m.AddTransition(new Transition<string>("q1", 'b', "q2"));
+            n.AddTransition(new Transition<string>("q3", 'a', "q2"));
+            n.AddTransition(new Transition<string>("q1", 'b', "q2"));
 
-            m.AddTransition(new Transition<string>("q2", 'a', "q4"));
-            m.AddTransition(new Transition<string>("q2", 'b', "q3"));
+            n.AddTransition(new Transition<string>("q2", 'a', "q4"));
+            n.AddTransition(new Transition<string>("q2", 'b', "q3"));
 
-            m.AddTransition(new Transition<string>("q2", 'a', "q1"));
-            m.AddTransition(new Transition<string>("q4", 'b', "q2"));
+            n.AddTransition(new Transition<string>("q2", 'a', "q1"));
+            n.AddTransition(new Transition<string>("q4", 'b', "q2"));
 
             //Error state, met fuik voor a en b
-            m.AddTransition(new Transition<string>("q4", 'a'));
-            m.AddTransition(new Transition<string>("q4", 'b'));
+            n.AddTransition(new Transition<string>("q4", 'a'));
+            n.AddTransition(new Transition<string>("q4", 'b'));
 
             //Start state
-            m.DefineAsStartState("q0");
+            n.DefineAsStartState("q0");
 
             //Final states
-            m.DefineAsFinalState("q4");
-            m.DefineAsFinalState("q3");
+            n.DefineAsFinalState("q4");
+            n.DefineAsFinalState("q3");
 
             return n;
         }
@@ -75,28 +75,28 @@ namespace ProjectFormeleMethodes.Examples
             //Derde alfabet
             Automata<string> o = new Automata<string>(alphabetXY);
 
-            m.AddTransition(new Transition<string>("q0", 'x', "q3"));
-            m.AddTransition(new Transition<string>("q0", 'y', "q2"));
+            o.AddTransition(new Transition<string>("q0", 'x', "q3"));
+            o.AddTransition(new Transition<string>("q0", 'y', "q2"));
 
-            m.AddTransition(new Transition<string>("q2", 'x', "q4"));
-            m.AddTransition(new Transition<string>("q4", 'y', "q2"));
+            o.AddTransition(new Transition<string>("q2", 'x', "q4"));
+            o.AddTransition(new Transition<string>("q4", 'y', "q2"));
 
-            m.AddTransition(new Transition<string>("q2", 'x', "q3"));
-            m.AddTransition(new Transition<string>("q4", 'y', "q2"));
+            o.AddTransition(new Transition<string>("q2", 'x', "q3"));
+            o.AddTransition(new Transition<string>("q4", 'y', "q2"));
 
-            m.AddTransition(new Transition<string>("q4", 'x', "q3"));
-            m.AddTransition(new Transition<string>("q1", 'y', "q2"));
+            o.AddTransition(new Transition<string>("q4", 'x', "q3"));
+            o.AddTransition(new Transition<string>("q1", 'y', "q2"));
 
             //Error state, met fuik voor x en y
-            m.AddTransition(new Transition<string>("q4", 'x'));
-            m.AddTransition(new Transition<string>("q4", 'y'));
+            o.AddTransition(new Transition<string>("q4", 'x'));
+            o.AddTransition(new Transition<string>("q4", 'y'));
 
             //Start state
-            m.DefineAsStartState("q0");
+            o.DefineAsStartState("q0");
 
             //Final states
-            m.DefineAsFinalState("q3");
-            m.DefineAsFinalState("q2");
+            o.DefineAsFinalState("q3");
+            o.DefineAsFinalState("q2");
 
             return o;
         }

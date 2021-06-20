@@ -7,8 +7,11 @@
 
   <ItemGroup>
     <Compile Remove="Visualization\bin\**" />
+    <Compile Remove="Visualization\Graphs\RegExp \**" />
     <EmbeddedResource Remove="Visualization\bin\**" />
+    <EmbeddedResource Remove="Visualization\Graphs\RegExp \**" />
     <None Remove="Visualization\bin\**" />
+    <None Remove="Visualization\Graphs\RegExp \**" />
   </ItemGroup>
 
   <ItemGroup>
