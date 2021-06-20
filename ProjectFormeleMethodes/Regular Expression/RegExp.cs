@@ -28,9 +28,6 @@ namespace ProjectFormeleMethodes.RegExpressions
             this.Terminals = "";
             this.Left = null;
             this.Right = null;
-
-            // keep track of the current regular expression
-            this.CurrentRegularExpression = "ɛ"; // add Epsilon to an empty regular expression
         }
 
         //  constructor

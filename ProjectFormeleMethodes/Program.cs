@@ -1,7 +1,6 @@
 ﻿// Our own usables
 using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
-using ProjectFormeleMethodes.ConversionEngines.Minimizer.Example;
 using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.RegExpressions;
@@ -27,6 +26,8 @@ namespace ProjectFormeleMethodes
             //var dfaOpt = toDFAEngine.Convert(ndfa);
 
             //GraphVizEngine.PrintGraph(dfaOpt, "NDFAToDFAGraph");
+
+            
 
             Console.WriteLine();
             RunConversionTestFull();
@@ -57,7 +58,10 @@ namespace ProjectFormeleMethodes
             Console.WriteLine();//
         }
 
-
+        public static RegExp BuildCustomRegExp(string regex)
+        {
+            return StringToRegExpBuilder.StringToRegex(regex, new RegExp());
+        }
 
         public static void RunConversionTestFull()
         {
@@ -68,10 +72,12 @@ namespace ProjectFormeleMethodes
             // (a | b)+
             rexp.PrintRegularExpression();
 
+            var rxp = BuildCustomRegExp("(a|b)+");
+
             // Test Thompson Conversion
             // Getting a NDFA model
             ThompsonEngine thomas = new ThompsonEngine();
-            var thompsonNdfa = thomas.ConvertRegExpToDFA(rexp);
+            var thompsonNdfa = thomas.ConvertRegExpToDFA(rxp);
             GraphVizEngine.PrintGraph(thompsonNdfa, "ThompsonEngineConversion");
 
             // Test NDFAToDFA
