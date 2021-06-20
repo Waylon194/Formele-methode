@@ -19,11 +19,6 @@ namespace ProjectFormeleMethodes.Regular_Expression
 
         }
 
-        public RegExpLogicOperator(RegExp exp)
-        {
-            this.exp = exp;
-        } 
-
         // Returns language which is accepted 
         public SortedSet<string> getAcceptedLanguages(RegExp expression, int amountOfIterations)
         {

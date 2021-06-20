@@ -2,6 +2,7 @@
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
 using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.RegExpressions;
+using ProjectFormeleMethodes.Regular_Expression;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,13 @@ namespace ProjectFormeleMethodes
             HopcroftEngine converter = new HopcroftEngine();
 
             return converter.MinimizeDFA(dfa);
+        }
+
+        public static void TestRegExpLanguage(RegExp exp)
+        {
+            // create a new logic manipulator object
+            RegExpLogicOperator rLogic = new RegExpLogicOperator();
+            Console.WriteLine("taal van (baa):\n" + rLogic.getAcceptedLanguages(exp, 5));
         }
     }
 }
