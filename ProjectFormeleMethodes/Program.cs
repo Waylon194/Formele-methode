@@ -1,13 +1,8 @@
 ﻿// Our own usables
-using ProjectFormeleMethodes.ConversionEngines;
-using ProjectFormeleMethodes.ConversionEngines.Minimizer;
 using ProjectFormeleMethodes.Examples;
 using ProjectFormeleMethodes.NDFA;
-using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.RegExpressions;
-using ProjectFormeleMethodes.Regular_Expression;
 using System;
-using System.Collections.Generic;
 
 namespace ProjectFormeleMethodes
 {
@@ -24,6 +19,17 @@ namespace ProjectFormeleMethodes
 
         public static RegExp CreateRegExp(int choice, string regexp = "")
         {
+            Console.WriteLine("RegExp");
+            Console.WriteLine("Welke optie?");
+            Console.WriteLine("1: RegExp sample 1");
+            Console.WriteLine("2: RegExp sample 2");
+            Console.WriteLine("3: RegExp custom");
+            Console.WriteLine("-1: Stoppen\n");
+
+            Console.Write("=>> ");
+            int value = -1;
+            int.TryParse(Console.ReadLine(), out value);
+
             switch (choice)
             {
                 case 1:
@@ -42,6 +48,18 @@ namespace ProjectFormeleMethodes
 
         public static Automata<string> CreateNDFA(int choice)
         {
+            Console.WriteLine("NDFABuilder");
+            Console.WriteLine("Welke optie?");
+            Console.WriteLine("1: NDFA sample 1");
+            Console.WriteLine("2: NDFA sample 2");
+            Console.WriteLine("3: NDFA sample 3");
+            Console.WriteLine("4: NDFA sample 4");
+            Console.WriteLine("-1: Stoppen\n");
+
+            Console.Write("=>> ");
+            int value = -1;
+            int.TryParse(Console.ReadLine(), out value);
+
             switch (choice)
             {
                 case 1:
@@ -63,6 +81,17 @@ namespace ProjectFormeleMethodes
 
         public static Automata<string> CreateDFA(int choice)
         {
+            Console.WriteLine("DFABuilder");
+            Console.WriteLine("Welke optie?");
+            Console.WriteLine("1: DFA sample 1");
+            Console.WriteLine("2: DFA sample 2");
+            Console.WriteLine("3: DFA sample 3");
+            Console.WriteLine("-1: Stoppen\n");
+
+            Console.Write("=>> ");
+            int value = -1;
+            int.TryParse(Console.ReadLine(), out value);
+
             switch (choice)
             {
                 case 1:
@@ -83,7 +112,8 @@ namespace ProjectFormeleMethodes
         {
             Console.WriteLine("Reguliere expressies - Conversie");
             Console.WriteLine("Welke optie?");
-            Console.WriteLine("1: RegExp->DNFA");
+            //Hier stond DNFA, maar moet NDFA zijn denk ik
+            Console.WriteLine("1: RegExp->NDFA");
             Console.WriteLine("2: RegExp->NDFA->DFA");
             Console.WriteLine("3: RegExp->NDFA->DFA->Minimaliseren");
             Console.WriteLine("-1: Stoppen\n");
@@ -118,7 +148,6 @@ namespace ProjectFormeleMethodes
                     GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAOption3");
                     break;
 
-
                 default: // RegExp -> NDFA -> DFA -> Minimaliseren - Default
                          // Convert Regexp to NDFA via Thompson
                     ndfa = tester.ConvertRegExpToNDFA(regExp);
@@ -152,9 +181,8 @@ namespace ProjectFormeleMethodes
                     break;
 
                 case 2: // Adjust DFA
-                    // 
+                    // TODO
                     break;
-
 
                 default:  // Minimize DFA - Default
                     dfa = tester.MinimizeDFA(dfaGiven);
@@ -193,9 +221,8 @@ namespace ProjectFormeleMethodes
                     break;
 
                 case 3: // Adjust NDFA
-                    // 
+                    // TODO
                     break;
-
 
                 default:  // Minimize DFA - Default
                     // Convert NDFA to DFA
@@ -324,18 +351,14 @@ namespace ProjectFormeleMethodes
                         case 1:
                             return new Tuple<bool, dynamic>(false, CreateDFA(value));
 
-
                         case 2:
                             return new Tuple<bool, dynamic>(false, CreateDFA(value));
-
 
                         case 3:
                             return new Tuple<bool, dynamic>(false, CreateDFA(value));
 
-
                         default:
                             return new Tuple<bool, dynamic>(false, CreateDFA(-1)); // back to default 
-
                     }
 
                 case -1:
