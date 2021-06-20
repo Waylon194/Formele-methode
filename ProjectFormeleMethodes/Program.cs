@@ -32,7 +32,14 @@ namespace ProjectFormeleMethodes
                     return RegExpBuilder.BuildRegExpSampleTwo();
 
                 case 3:
-                    return RegExpBuilder.BuildCustomRegExp(regexp);
+                    var regex = RegExpBuilder.BuildCustomRegExp(regexp);
+                    if (regex != null)
+                    {
+                        return regex;
+                    }
+                    Console.WriteLine("Inputted value incorrect");
+                    ConsoleBuilderSelecterTest();
+                    return RegExpBuilder.BuildRegExpSampleTwo();
 
                 default:
                     return RegExpBuilder.BuildRegExpSampleTwo();
@@ -390,17 +397,8 @@ namespace ProjectFormeleMethodes
                     switch (value)
                     {
                         case 1:
-                            return new Tuple<bool, dynamic>(true, CreateNDFA(value));
-
-
                         case 2:
-                            return new Tuple<bool, dynamic>(true, CreateNDFA(value));
-
-
                         case 3:
-                            return new Tuple<bool, dynamic>(true, CreateNDFA(value));
-
-
                         case 4:
                             return new Tuple<bool, dynamic>(true, CreateNDFA(value));
 
@@ -430,11 +428,7 @@ namespace ProjectFormeleMethodes
                     switch (value)
                     {
                         case 1:
-                            return new Tuple<bool, dynamic>(false, CreateDFA(value));
-
                         case 2:
-                            return new Tuple<bool, dynamic>(false, CreateDFA(value));
-
                         case 3:
                             return new Tuple<bool, dynamic>(false, CreateDFA(value));
 
