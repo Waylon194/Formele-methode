@@ -12,7 +12,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
     public class NDFAToDFAEngine
     {
         private readonly char EPSILON = 'ɛ';
-        private readonly string EMPTY_STATE_ID = "";
+        private readonly string EMPTY_STATE_ID = "{ }";
         public NDFAToDFAEngine()
         {
 
@@ -34,6 +34,7 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
 
         private void finalizeConversion(Table stateTable, ref Automata<string> dfa, Automata<string> ndfa)
         {
+            bool emptyStateTransOccured = false;
             foreach (var state in stateTable.AvailableStates)
             {
                 foreach (var column in stateTable.Columns)
@@ -55,11 +56,27 @@ namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
                         }
                     }
                     string combinedStates = "";
-                    foreach (var item in column.ReachableStates[state])
+
+                    if (!column.ReachableStates.ContainsKey(state))
                     {
-                        combinedStates += item;
+                        emptyStateTransOccured = true; // toggles a boolean to signal "Fuik" is needed
+                        dfa.AddTransition(new Transition<string>(state, column.Symbol, EMPTY_STATE_ID));
                     }
-                    dfa.AddTransition(new Transition<string>(state, column.Symbol, combinedStates));
+                    else
+                    {
+                        foreach (var item in column.ReachableStates[state])
+                        {
+                            combinedStates += item;
+                        }
+                        dfa.AddTransition(new Transition<string>(state, column.Symbol, combinedStates));
+                    }                    
+                }
+            }
+            if (emptyStateTransOccured)
+            {
+                foreach (var symbol in dfa.Symbols)
+                {
+                    dfa.AddTransition(new Transition<string>(EMPTY_STATE_ID, symbol, EMPTY_STATE_ID));
                 }
             }
             Console.WriteLine();
