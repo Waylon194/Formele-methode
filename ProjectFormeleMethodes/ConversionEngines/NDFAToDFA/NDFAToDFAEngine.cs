@@ -211,30 +211,5 @@ namespace ProjectFormeleMethodes.ConversionEngines
                 }
             }
         }
-
-        public Automata<string> Reverse(Automata<string> automaat)
-        {
-            Automata<string> reverseAutomaat = new Automata<string>(automaat.Symbols);
-            foreach (Transition<string> transition in automaat.Transitions)
-            {
-                reverseAutomaat.AddTransition(
-                    new Transition<string>(transition.ToState, transition.Symbol, transition.FromState));
-            }
-            reverseAutomaat.StartStates = automaat.FinalStates;
-            reverseAutomaat.FinalStates = automaat.StartStates;
-            return reverseAutomaat;
-        }
-
-        // The minimize method of the DFA
-        public Automata<string> OptimizeDfa(Automata<string> dfa)
-        {
-            Automata<string> one = Reverse(dfa);
-            Automata<string> two = Convert(one);
-            Automata<string> three = Reverse(two);
-            Automata<string> four = Convert(three);
-
-            //return four;
-            return Convert(Reverse(Convert(Reverse(four))));
-        }
     }
 }
