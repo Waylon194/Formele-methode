@@ -19,18 +19,18 @@ namespace ProjectFormeleMethodes
 
         public static void Main(string[] args)
         {
-            //var ndfa = GenerateNDFA();
+            var ndfa = GenerateNDFA();
             //GraphVizEngine.PrintGraph(ndfa, "NDFAGraph");
 
-            //NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
-            //var dfaOpt = toDFAEngine.Convert(ndfa);
+            NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
+            var dfaOpt = toDFAEngine.Convert(ndfa);
 
             //Console.WriteLine();
             ////RunTest();
             ///
 
-            TestNFA test = new TestNFA();
-            test.Test();
+            //TestNFA test = new TestNFA();
+            //test.Test();
         }
 
         public static void Testing()
