@@ -14,6 +14,8 @@ namespace ProjectFormeleMethodes
 {
     public class Program
     {
+        private static bool GraphVizEngineTOGGLE = false;
+
         private static RegExp baa, bb, baaOrbb, baaOrbborEp, regPlus, all, a, b, regStar;
         private static List<RegExp> regExps = new List<RegExp>();
 
@@ -73,30 +75,32 @@ namespace ProjectFormeleMethodes
             RegExp b = new RegExp("b");
             rexp = rexp.Or(b).Plus();
 
-            //rexp = GenerateRandomRegExp(5);
             rexp.PrintRegularExpression();
 
             // Test Thompson Conversion
             // Getting a NDFA model
             ThompsonEngine thomas = new ThompsonEngine();
             var ndfa = thomas.ConvertRegExpToDFA(rexp);
-            //var dnfa =ThompsonConstructionExample.ConvertRegExp(rexp);
+            //var dnfa =ThompsonConstructionExample.ConvertRegExp(rexp); // example version
 
             var ndfaForTesting = GenerateNDFA(); 
 
             // Getting a DFA from a NDFA
-            //Automata<string> dfa = NDFAtoDFAEngineExample.Convert(ndfa); // NDFAtoDFAEngine Example
-            NDFAToDFAEngineOld toDFAEngine = new NDFAToDFAEngineOld(); // NDFAtoDFAEngine 
+            //Automata<string> dfa = NDFAtoDFAEngineExample.Convert(ndfa); // NDFAtoDFAEngine Example version
+            NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
             var dfaOpt = toDFAEngine.Convert(ndfaForTesting);
 
             // Own Thompson engine
             HopcroftEngine hopEngine = new HopcroftEngine();
             var optimizedDFAOwn = hopEngine.MinimizeDFA(ndfaForTesting);
 
-            //var optimizedDFAOwnExample = HopCroftAlgorExample.MinimizeDfa(dfa);
+            //var optimizedDFAOwnExample = HopCroftAlgorExample.MinimizeDfa(dfa); // example version
             Console.WriteLine();
 
-            GraphVizEngine.PrintGraph(ndfaForTesting, "TestGraphNDFA");
+            if (GraphVizEngineTOGGLE)
+            {
+                GraphVizEngine.PrintGraph(ndfaForTesting, "TestGraphNDFA");
+            }
 
             //GraphVizEngine.PrintGraph(dfa, "TestGraphPreMinimizedSample");
             //GraphVizEngine.PrintGraph(optimizedDFAOwn, "TestGraphOwnDesignSample");
@@ -138,22 +142,6 @@ namespace ProjectFormeleMethodes
             ndfa.AddTransition(new Transition<string>("qF", 'a', "q3"));
 
             return ndfa;
-        }
-
-        public static RegExp GenerateRandomRegExp(int remainingSteps)
-        {
-
-
-            //while (remainingSteps > 0 )
-            //{
-            //    Random randomizer = new Random();
-            //    int randValue = randomizer.Next(0, 4);
-
-
-            //    remainingSteps--;
-            //}
-            //return rexp;
-            return null;
         }
 
         public static void TestRegExpAndThompson()
