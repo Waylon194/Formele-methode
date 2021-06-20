@@ -5,12 +5,12 @@ namespace ProjectFormeleMethodes.Examples
 {
     public class DFABuilder
     {
+        //Alfabets
+        char[] alphabetAB = { 'a', 'b' };
+        char[] alphabetXY = { 'x', 'y' };
+
         public static Automata<string> BuildDFASampleOne()
         {
-            //Alfabets
-            char[] alphabetAB = { 'a', 'b' };
-            char[] alphabetXY = { 'x', 'y' };
-
             Automata<string> m = new Automata<string>(alphabetAB);
 
             m.AddTransition(new Transition<string>("q0", 'a', "q1"));
@@ -37,7 +37,10 @@ namespace ProjectFormeleMethodes.Examples
             m.DefineAsFinalState("q3");
 
             return m;
+        }
 
+        public static Automata<string> BuildDFASampleTwo()
+        {
             //Tweede alfabet
             Automata<string> n = new Automata<string>(alphabetAB);
 
@@ -65,7 +68,10 @@ namespace ProjectFormeleMethodes.Examples
             m.DefineAsFinalState("q3");
 
             return n;
+        }
 
+        public static Automata<string> BuildDFASampleThree()
+        {
             //Derde alfabet
             Automata<string> o = new Automata<string>(alphabetXY);
 
