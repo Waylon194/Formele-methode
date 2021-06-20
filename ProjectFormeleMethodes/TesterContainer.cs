@@ -23,23 +23,37 @@ namespace ProjectFormeleMethodes
             return converter.Convert(nDFA);
         }
 
-        public Automata<string> MinimizeDFA(Automata<string> dfa)
+        public Automata<string> MinimizeDFAHopCroft(Automata<string> dfa)
         {
+            Console.WriteLine("Minimizing DFA - HopCroft.....");
+
             HopcroftEngine converter = new HopcroftEngine();
 
             return converter.MinimizeDFA(dfa);
+        }
+
+        public Automata<string> MinimizeDFAReverseMethod(Automata<string> dfa)
+        {
+            Console.WriteLine("Minimizing DFA - Reversed.....");
+
+            var optimizedDfa = dfa.MinimizeDFAReversedAlgorithm(dfa);
+
+            return optimizedDfa;
         }
 
         public void TestRegExpLanguage(RegExp exp)
         {
             // create a new logic manipulator object
             RegExpLogicOperator rLogic = new RegExpLogicOperator();
-            Console.WriteLine("taal van (baa):\n" + rLogic.getAcceptedLanguages(exp, 5));
+            Console.Write("Language of {0}");
+            exp.PrintRegularExpression();
+            Console.WriteLine("Language:\n" + rLogic.getAcceptedLanguages(exp, 5));
         }
 
         public Automata<string> CreateNotVariantOfAutomata(Automata<string> toFlip)
         {
-            return Automata<string>.CreateNotVariant(toFlip);
+            // simple reverse of DFA
+            return Automata<string>.CreateReversedVariant(toFlip);
         }
     }
 }

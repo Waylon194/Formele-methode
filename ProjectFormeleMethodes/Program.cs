@@ -8,16 +8,11 @@ namespace ProjectFormeleMethodes
 {
     public class Program
     {
-        private static bool GraphVizEngineTOGGLE = false;
         private static TesterContainer testerUtil = new TesterContainer();
 
         public static void Main(string[] args)
         {
-            //var normal = DFABuilder.BuildDFASampleOne();
-            //var flipped = testerUtil.CreateNotVariantOfAutomata(normal);
-
-            Console.WriteLine();
-
+            // Console Testing application
             var result = ConsoleBuilderSelecterTest();
 
             if (result != null)
@@ -90,7 +85,9 @@ namespace ProjectFormeleMethodes
             //Hier stond DNFA, maar moet NDFA zijn denk ik
             Console.WriteLine("1: RegExp->NDFA");
             Console.WriteLine("2: RegExp->NDFA->DFA");
-            Console.WriteLine("3: RegExp->NDFA->DFA->Minimaliseren");
+            Console.WriteLine("3: RegExp->NDFA->DFA->Minimaliseren-HopCroft");
+            Console.WriteLine("4: RegExp->NDFA->DFA->Minimaliseren-Reverse");
+            Console.WriteLine("5: RegExp->NDFA->DFA->Minimaliseren-HopCroft-NOT");
             Console.WriteLine("-1: Stoppen");
             Console.WriteLine("0: Terug\n");
 
@@ -104,6 +101,7 @@ namespace ProjectFormeleMethodes
                         // Convert Regexp to NDFA via Thompson
                     var ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
                     GraphVizEngine.PrintGraph(ndfa, "RegExpThompsonConvertedNDFAOption1");
+                    Console.WriteLine();
                     break;
 
                 case 2: // RegExp -> NDFA -> DFA
@@ -112,6 +110,7 @@ namespace ProjectFormeleMethodes
                     // Convert NDFA to DFA
                     var dfa = testerUtil.ConvertNDFAToDFA(ndfa);
                     GraphVizEngine.PrintGraph(dfa, "RegExpNDFAConvertedDFAOption2");
+                    Console.WriteLine();
                     break;
 
                 case 3: // RegExp -> NDFA -> DFA -> Minimaliseren
@@ -120,8 +119,33 @@ namespace ProjectFormeleMethodes
                     // Convert NDFA to DFA
                     dfa = testerUtil.ConvertNDFAToDFA(ndfa);
                     // Minimize DFA
-                    dfa = testerUtil.MinimizeDFA(dfa);
-                    GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAOption3");
+                    dfa = testerUtil.MinimizeDFAHopCroft(dfa);
+                    GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAHopCroftOption3");
+                    Console.WriteLine();
+                    break;
+
+                case 4:// RegExp -> NDFA -> DFA -> Minimaliseren
+                       // Convert Regexp to NDFA via Thompson
+                    ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
+                    // Convert NDFA to DFA
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfa);
+                    // Minimize DFA
+                    dfa = testerUtil.MinimizeDFAReverseMethod(dfa);
+                    GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAReversedOption4");
+                    Console.WriteLine();
+                    break;
+
+                case 5:// RegExp -> NDFA -> DFA -> Minimaliseren
+                       // Convert Regexp to NDFA via Thompson
+                    ndfa = testerUtil.ConvertRegExpToNDFA(regExp);
+                    // Convert NDFA to DFA
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfa);
+                    // Minimize DFA
+                    dfa = testerUtil.MinimizeDFAHopCroft(dfa);
+                    // create not variant of the DFA
+                    var notDFA = testerUtil.CreateNotVariantOfAutomata(dfa);
+                    GraphVizEngine.PrintGraph(notDFA, "RegExpMinimizedDFAReversedNotVariantOption5");
+                    Console.WriteLine();
                     break;
 
                 // stoppen
@@ -139,35 +163,54 @@ namespace ProjectFormeleMethodes
                     // Convert NDFA to DFA
                     dfa = testerUtil.ConvertNDFAToDFA(ndfa);
                     // Minimize DFA
-                    dfa = testerUtil.MinimizeDFA(dfa);
+                    dfa = testerUtil.MinimizeDFAHopCroft(dfa);
                     GraphVizEngine.PrintGraph(dfa, "RegExpMinimizedDFAOptionDEFAULT");
+                    Console.WriteLine();
                     break;
             }
+            ConsoleBuilderSelecterTest();
         }
 
         private static void handleDFAChoice(Automata<string> dfaGiven)
         {
             Console.WriteLine("DFA expressies - Conversie/Veranderen");
             Console.WriteLine("Welke optie?");
-            Console.WriteLine("1: DFA->Minimaliseren");
-            Console.WriteLine("2: Adjust DFA");
+            Console.WriteLine("1: DFA->Minimaliseren-HopCroft");
+            Console.WriteLine("2: DFA->Minimaliseren-Reverse");
+            Console.WriteLine("3: Not DFA");
             Console.WriteLine("-1: Stoppen");
-            Console.WriteLine("0: Terug\n");
+            Console.WriteLine("0: Terug");
+            Console.WriteLine("DEFAULT: Print DFA\n");            
 
             Console.Write("=>> ");
-            int value = -1;
-            int.TryParse(Console.ReadLine(), out value);
+            int value = -2;
+            bool success = int.TryParse(Console.ReadLine(), out value);
+
+            if (success == false)
+            {
+                value = -2;
+            }
 
             switch (value)
             {
                 case 1:
                     // Minimize DFA
-                    var dfa = testerUtil.MinimizeDFA(dfaGiven);
-                    GraphVizEngine.PrintGraph(dfa, "DFAMinimizedDFAOption1");
+                    var dfa = testerUtil.MinimizeDFAHopCroft(dfaGiven);
+                    GraphVizEngine.PrintGraph(dfa, "DFAMinimizedHopCroftDFAOption1");
+                    Console.WriteLine();
                     break;
 
-                case 2: // Adjust DFA
-                    // TODO
+                case 2:
+                    // Minimize DFA
+                    dfa = testerUtil.MinimizeDFAReverseMethod(dfaGiven);
+                    GraphVizEngine.PrintGraph(dfa, "DFAMinimizedReversedDFAOption2");
+                    Console.WriteLine();
+                    break;
+
+                case 3: // Adjust DFA
+                    var notDFA = testerUtil.CreateNotVariantOfAutomata(dfaGiven);
+                    GraphVizEngine.PrintGraph(notDFA, "DFANotVariantOption3");
+                    Console.WriteLine();
                     break;
 
                 // stoppen
@@ -179,26 +222,35 @@ namespace ProjectFormeleMethodes
                     ConsoleBuilderSelecterTest();
                     break;
 
-                default:  // Minimize DFA - Default
-                    dfa = testerUtil.MinimizeDFA(dfaGiven);
-                    GraphVizEngine.PrintGraph(dfa, "DFAMinimizedDFAOption1");
+                default:  // Print DFA - Default
+                    GraphVizEngine.PrintGraph(dfaGiven, "DFANormal");
+                    Console.WriteLine();
                     break;
             }
+            ConsoleBuilderSelecterTest();
         }
 
-        private static void handleNDFAChoice(dynamic ndfaGiven)
+        private static void handleNDFAChoice(Automata<string> ndfaGiven)
         {
             Console.WriteLine("DFA expressies - Conversie/Veranderen");
             Console.WriteLine("Welke optie?");
             Console.WriteLine("1: NDFA->DFA");
-            Console.WriteLine("2: NDFA->DFA->Minimaliseren");
-            Console.WriteLine("3: Adjust DFA");
+            Console.WriteLine("2: NDFA->DFA->Minimaliseren-HopCroft");
+            Console.WriteLine("3: NDFA->DFA->Minimaliseren-Reverse");
+            Console.WriteLine("4: Not NDFA");
             Console.WriteLine("-1: Stoppen");
-            Console.WriteLine("0: Terug\n");
+            Console.WriteLine("0: Terug");
+            Console.WriteLine("DEFAULT: Print NDFA\n");
 
             Console.Write("=>> ");
-            int value = -1;
-            int.TryParse(Console.ReadLine(), out value);
+            int value = -2;
+
+            bool success = int.TryParse(Console.ReadLine(), out value);
+
+            if (success == false)
+            {
+                value = -2;
+            }
 
             switch (value)
             {
@@ -206,18 +258,31 @@ namespace ProjectFormeleMethodes
                     // Convert NDFA to DFA
                     var dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
                     GraphVizEngine.PrintGraph(dfa, "NDFANDFAConvertedDFAOption1");
+                    Console.WriteLine();
                     break;
 
                 case 2: // NDFA -> DFA -> Minimaliseren
                     // Convert NDFA to DFA
                     dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
                     // Minimize DFA
-                    dfa = testerUtil.MinimizeDFA(dfa);
-                    GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedDFAOption2");
+                    dfa = testerUtil.MinimizeDFAHopCroft(dfa);
+                    GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedHopCroftDFAOption2");
+                    Console.WriteLine();
                     break;
 
-                case 3: // Adjust NDFA
-                    // TODO
+                case 3:// NDFA -> DFA -> Minimaliseren
+                    // Convert NDFA to DFA
+                    dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
+                    // Minimize DFA
+                    dfa = testerUtil.MinimizeDFAReverseMethod(dfa);
+                    GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedReverseDFAOption3");
+                    Console.WriteLine();
+                    break;
+
+                case 4: // Adjust NDFA
+                    var notDFA = testerUtil.CreateNotVariantOfAutomata(ndfaGiven);
+                    GraphVizEngine.PrintGraph(notDFA, "NDFANotVariantOption4");
+                    Console.WriteLine();
                     break;
 
                     // stoppen
@@ -228,14 +293,12 @@ namespace ProjectFormeleMethodes
                     ConsoleBuilderSelecterTest();
                     break;
 
-                default:  // Minimize DFA - Default
-                    // Convert NDFA to DFA
-                    dfa = testerUtil.ConvertNDFAToDFA(ndfaGiven);
-                    // Minimize DFA
-                    dfa = testerUtil.MinimizeDFA(dfa);
-                    GraphVizEngine.PrintGraph(dfa, "NDFAMinimizedDFAOption2");
+                default:  // Print NDFA - Default
+                    GraphVizEngine.PrintGraph(ndfaGiven, "NDFANormal");
+                    Console.WriteLine();
                     break;
             }
+            ConsoleBuilderSelecterTest();
         }
 
         public static void ConsoleExecute(dynamic returnedValue, bool isNDFA)
@@ -358,7 +421,7 @@ namespace ProjectFormeleMethodes
                     Console.WriteLine("1: Sample 1");
                     Console.WriteLine("2: Sample 2");
                     Console.WriteLine("3: Sample 3");
-                    Console.WriteLine("3: Terug\n");
+                    Console.WriteLine("0: Terug\n");
 
                     Console.Write("=>> ");
                     value = -1;
