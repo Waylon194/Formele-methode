@@ -68,6 +68,7 @@ namespace ProjectFormeleMethodes.ConversionEngines
 
             // add the symbols of the regular expression to the NDFA
             ndfaModel.Symbols = new SortedSet<char>(ndfaModel.Transitions.Distinct().Select(e => e.Symbol).ToList());
+            ndfaModel.Symbols.Remove('ɛ');
             return ndfaModel;
         }
 

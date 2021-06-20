@@ -2,7 +2,6 @@
 using ProjectFormeleMethodes.ConversionEngines;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer;
 using ProjectFormeleMethodes.ConversionEngines.Minimizer.Example;
-using ProjectFormeleMethodes.ConversionEngines.NDFAToDFA;
 using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
 using ProjectFormeleMethodes.RegExpressions;
@@ -21,15 +20,17 @@ namespace ProjectFormeleMethodes
 
         public static void Main(string[] args)
         {
-            var ndfa = GenerateNDFA();
-            //GraphVizEngine.PrintGraph(ndfa, "NDFAGraph");
+            //var ndfa = GenerateNDFA();
+            ////GraphVizEngine.PrintGraph(ndfa, "NDFAGraph");
 
-            NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
-            var dfaOpt = toDFAEngine.Convert(ndfa);
+            //NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
+            //var dfaOpt = toDFAEngine.Convert(ndfa);
 
-            //Console.WriteLine();
-            ////RunTest();
-            ///
+            //GraphVizEngine.PrintGraph(dfaOpt, "NDFAToDFAGraph");
+
+            Console.WriteLine();
+            RunConversionTestFull();
+            
 
             //TestNFA test = new TestNFA();
             //test.Test();
@@ -56,58 +57,38 @@ namespace ProjectFormeleMethodes
             Console.WriteLine();//
         }
 
-        public static void RunTest()
+
+
+        public static void RunConversionTestFull()
         {
-            RegExp regB, regBaa, regBb;
-            regB = new RegExp("b");
-
-            // expr1: "baa"
-            regBaa = new RegExp("baa");
-
-            // expr2: "bb"
-            regBb = new RegExp("bb");
-
-            regExps.Add(regB);
-            regExps.Add(regBaa);
-            regExps.Add(regBb);
-
             RegExp rexp = new RegExp("a");
             RegExp b = new RegExp("b");
             rexp = rexp.Or(b).Plus();
 
+            // (a | b)+
             rexp.PrintRegularExpression();
 
             // Test Thompson Conversion
             // Getting a NDFA model
             ThompsonEngine thomas = new ThompsonEngine();
-            var ndfa = thomas.ConvertRegExpToDFA(rexp);
-            //var dnfa =ThompsonConstructionExample.ConvertRegExp(rexp); // example version
+            var thompsonNdfa = thomas.ConvertRegExpToDFA(rexp);
+            GraphVizEngine.PrintGraph(thompsonNdfa, "ThompsonEngineConversion");
 
-            var ndfaForTesting = GenerateNDFA(); 
-
+            // Test NDFAToDFA
             // Getting a DFA from a NDFA
-            //Automata<string> dfa = NDFAtoDFAEngineExample.Convert(ndfa); // NDFAtoDFAEngine Example version
             NDFAToDFAEngine toDFAEngine = new NDFAToDFAEngine(); // NDFAtoDFAEngine 
-            var dfaOpt = toDFAEngine.Convert(ndfaForTesting);
+            var dfa = toDFAEngine.Convert(thompsonNdfa);
+            GraphVizEngine.PrintGraph(dfa, "NDFAToDFAConversion");
 
-            // Own Thompson engine
+            // HopCroftEngine Test
             HopcroftEngine hopEngine = new HopcroftEngine();
-            var optimizedDFAOwn = hopEngine.MinimizeDFA(ndfaForTesting);
-
-            //var optimizedDFAOwnExample = HopCroftAlgorExample.MinimizeDfa(dfa); // example version
-            Console.WriteLine();
+            var optimizedDFAOwn = hopEngine.MinimizeDFA(dfa);
+            GraphVizEngine.PrintGraph(optimizedDFAOwn, "MinimizedDFA");
 
             if (GraphVizEngineTOGGLE)
             {
-                GraphVizEngine.PrintGraph(ndfaForTesting, "TestGraphNDFA");
+                //GraphVizEngine.PrintGraph(optimizedDFAOwn, "TestGraphNDFA");
             }
-
-            //GraphVizEngine.PrintGraph(dfa, "TestGraphPreMinimizedSample");
-            //GraphVizEngine.PrintGraph(optimizedDFAOwn, "TestGraphOwnDesignSample");
-            //GraphVizEngine.PrintGraph(optimizedDFAOwnExample, "TestGraphExampleSample");
-
-            //TestRegExpAndThompson();
-            //TestLanguage();
         }
 
         public static Automata<string> GenerateNDFA()
@@ -115,7 +96,6 @@ namespace ProjectFormeleMethodes
             Automata<string> ndfa = new Automata<string>();
             ndfa.Symbols.Add('a'); 
             ndfa.Symbols.Add('b'); 
-            ndfa.Symbols.Add('ɛ');
 
             ndfa.DefineAsStartState("q0");
             ndfa.DefineAsFinalState("qF");
@@ -170,17 +150,9 @@ namespace ProjectFormeleMethodes
             // all: "(baa | bb)+ ⋅ (a|b)*"
             all = regPlus.Dot(regStar);
 
-            //all.PrintRegularExpression();
-
             all.PrintRegularExpression();
 
             TestLanguage();
-
-            // Test Thompson Conversion
-            ThompsonEngine thomas = new ThompsonEngine();
-            var o2 = thomas.ConvertRegExpToDFA(all);
-
-            Console.WriteLine();
         }
 
         public static void TestLanguage(RegExp exp = null)

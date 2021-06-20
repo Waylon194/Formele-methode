@@ -1,5 +1,4 @@
-﻿using ProjectFormeleMethodes.ConversionEngines.NDFAToDFA.Models;
-using ProjectFormeleMethodes.NDFA;
+﻿using ProjectFormeleMethodes.NDFA;
 using ProjectFormeleMethodes.NDFA.Transitions;
 using System;
 using System.Collections.Generic;
@@ -7,208 +6,238 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectFormeleMethodes.ConversionEngines.NDFAToDFA
+namespace ProjectFormeleMethodes.ConversionEngines
 {
     public class NDFAToDFAEngine
     {
-        private readonly char EPSILON = 'ɛ';
-        private readonly string EMPTY_STATE_ID = "{ }";
-        public NDFAToDFAEngine()
-        {
-
-        }
-
         public Automata<string> Convert(Automata<string> ndfa)
         {
             Automata<string> dfa = new Automata<string>(ndfa.Symbols);
+            string combinedStartState = "";
+            SortedSet<string> completeStartState = new SortedSet<string>();
 
-            var helperTable = createEmptyTable(ndfa);
-            createHelperTable(ndfa, ref helperTable);
-
-            var stateTable = createStateTable(ndfa, helperTable);
-
-            finalizeConversion(stateTable, ref dfa, ndfa);
-
-            return dfa;
-        }
-
-        private void finalizeConversion(Table stateTable, ref Automata<string> dfa, Automata<string> ndfa)
-        {
-            bool emptyStateTransOccured = false;
-            foreach (var state in stateTable.AvailableStates)
+            bool isFinalState = false;
+            // Loop through all the available start states from the ndfa and create a list with them + their epsilon-linked states
+            foreach (string startState in ndfa.StartStates)
             {
-                foreach (var column in stateTable.Columns)
-                {
-                    foreach (var startStateDefiner in ndfa.StartStates)
-                    {
-                        if (state.Contains(startStateDefiner))
-                        {
-                            // start state found
-                            dfa.DefineAsStartState(state);
-                        }
-                    }
-                    foreach (var finalStateDefiner in ndfa.FinalStates)
-                    {
-                        if (state.Contains(finalStateDefiner))
-                        {
-                            // start state found
-                            dfa.DefineAsFinalState(state);
-                        }
-                    }
-                    string combinedStates = "";
+                RetrieveEpsilonIncludedState(startState, ndfa, ref completeStartState);
+            }
 
-                    if (!column.ReachableStates.ContainsKey(state))
-                    {
-                        emptyStateTransOccured = true; // toggles a boolean to signal "Fuik" is needed
-                        dfa.AddTransition(new Transition<string>(state, column.Symbol, EMPTY_STATE_ID));
-                    }
-                    else
-                    {
-                        foreach (var item in column.ReachableStates[state])
-                        {
-                            combinedStates += item;
-                        }
-                        dfa.AddTransition(new Transition<string>(state, column.Symbol, combinedStates));
-                    }                    
+            //Turn sortedset into a string with all its states
+            foreach (string s in completeStartState)
+            {
+                combinedStartState += s + "_";
+                if (ndfa.FinalStates.Contains(s))
+                    isFinalState = true;
+            }
+
+            //trim last "_" off of string
+            combinedStartState = combinedStartState.TrimEnd('_');
+            //Start conversion
+            ConvertState(combinedStartState, ref dfa, ref ndfa);
+            // Define combinedStartState as one and only start state in dfa
+            dfa.DefineAsStartState(combinedStartState);
+            if (isFinalState)
+            {
+                dfa.DefineAsFinalState(combinedStartState);
+            }
+
+            // Add a symbol loop to the failstate if one is created during conversion.
+            if (dfa.States.Contains("F"))
+            {
+                foreach (char route in dfa.Symbols)
+                {
+                    dfa.AddTransition(new Transition<string>("F", route, "F"));
                 }
             }
-            if (emptyStateTransOccured)
+            return finaliseConversion(dfa);
+        }
+
+        private Automata<string> finaliseConversion(Automata<string> merged)
+        {
+            Automata<string> finalisedMerge = new Automata<string>(merged.Symbols);
+
+            foreach (Transition<string> t in merged.Transitions)
             {
-                foreach (var symbol in dfa.Symbols)
+                finalisedMerge.AddTransition(new Transition<string>(t.FromState.Replace("_", string.Empty), t.Symbol, t.ToState.Replace("_", string.Empty)));
+            }
+
+            foreach (string startState in merged.StartStates)
+            {
+                finalisedMerge.DefineAsStartState(startState.Replace("_", string.Empty));
+            }
+
+            foreach (string finalState in merged.FinalStates)
+            {
+                finalisedMerge.DefineAsFinalState(finalState.Replace("_", string.Empty));
+            }
+            return finalisedMerge;
+        }
+
+        private void RetrieveEpsilonIncludedState(string state, Automata<string> auto, ref SortedSet<string> subStateList)
+        {
+            //Add given state to the given substatelist
+            subStateList.Add(state);
+
+            //retrieve the list of transitions from the given state
+            List<Transition<string>> trans = auto.GetTransition(state);
+
+            //Loop through all the transitions in search of epsilon routes. If a epsilon route is found that is not yet included in the list the route and its subsequent epsilon routes-
+            //Will be added to substatelist through recursion.
+            foreach (Transition<string> t in trans)
+            {
+                if (t.Symbol == 'ɛ' && !subStateList.Contains(t.ToState))
                 {
-                    dfa.AddTransition(new Transition<string>(EMPTY_STATE_ID, symbol, EMPTY_STATE_ID));
+                    RetrieveEpsilonIncludedState(t.ToState, auto, ref subStateList);
                 }
             }
-            Console.WriteLine();
+            /////Handy should we ever need to remove duplicates from an array without the use of sortedset<>
+            //string[] individualSubStates = (completeState.Split('_')).Distinct().ToArray();
         }
 
-        private SortedSet<string> getAllTotalStates(Table stateTable)
+        private bool CheckExistingRouteForChar(string currentState, char symbol, Automata<string> dfa)
         {
-            SortedSet<string> states = new SortedSet<string>();
-            states.Add(stateTable.Columns.FirstOrDefault().ReachableStates.FirstOrDefault().Key);
-
-            foreach (var rows in stateTable.Columns)
+            List<Transition<string>> currentTrans = dfa.GetTransition(currentState);
+            foreach (Transition<string> t in currentTrans)
             {
-                foreach (var singleRow in rows.ReachableStates)
+                if (t.Symbol == symbol)
                 {
-                    var rowStates = singleRow.Value;
-                    string rowState = "";
-                    foreach (var item in rowStates)
-                    {
-                        rowState += item;
-                    }
-                    states.Add(rowState);
+                    return true;
                 }
             }
-            return states;
+            return false;
         }
 
-        private Table createStateTable(Automata<string> ndfa, Table helperTable)
+        private int CheckAvailableRoutes(string[] states, char symbol, Automata<string> ndfa)
         {
-            Table stateTable = createEmptyTable(ndfa);
-            stateTable.AvailableStates = getAllTotalStates(helperTable);
-            int symbolIndex = 0;
+            //array which shows how many possible routes there are for each sub-state
+            int[] possibleRoutesPerState = new int[states.Length];
+            //// value that shows the amount of routes the ndfa has for all the substates combined.
+            int correctAmountOfRoutes = 0;
 
-            foreach (var combinedState in stateTable.AvailableStates)
+            //reads ndfa for possible routes, saves maximum amount of accessible routes to correctAmountOfRoutes
+            foreach (string state in states)
             {
-                foreach (var state in helperTable.AvailableStates)
+                if (ndfa.GetTransition(state).Count(transition => transition.Symbol == symbol) > correctAmountOfRoutes)
                 {
-                    foreach (var column in helperTable.Columns)
-                    {
-                        foreach (var stateData in column.ReachableStates)
-                        {
-                            if (combinedState.Contains(stateData.Key))
-                            {
-                                if (!stateTable.Columns[symbolIndex].ReachableStates.ContainsKey(combinedState))
-                                {
-                                    stateTable.Columns[symbolIndex].AddReachableState(combinedState, column.ReachableStates[stateData.Key]);
-                                }
-                                stateTable.Columns[symbolIndex].ReachableStates[combinedState].UnionWith(column.ReachableStates[stateData.Key]);
-                            }                            
-                        }
-                        symbolIndex++;
-                    }
-                    symbolIndex = 0;
-                }                
-            }
-            return stateTable;
-        }
-
-        private void GetReachableStatesByEpsilons(Automata<string> ndfa, Transition<string> transition, ref SortedSet<string> reachableStates)
-        {
-            var transitionsToTraverse = ndfa.GetTransition(transition.ToState).Where(item => item.FromState == transition.ToState).ToList();
-
-            foreach (var transitionToTraverse in transitionsToTraverse)
-            {
-                if (transitionToTraverse.Symbol.Equals(EPSILON) && transition.Symbol != EPSILON)
-                {
-                    reachableStates.Add(transitionToTraverse.FromState);
-                    GetReachableStatesByEpsilons(ndfa, transitionToTraverse, ref reachableStates);
+                    correctAmountOfRoutes = ndfa.GetTransition(state).Count(transition => transition.Symbol == symbol);
                 }
             }
-            if (!transitionsToTraverse.Select(item => item.Symbol).Contains(EPSILON))
-            {
-                reachableStates.Add(transition.ToState);
-            }
-            else if (transitionsToTraverse.Count() == 0)
-            {
-                reachableStates.Add(EMPTY_STATE_ID);
-            }
-            Console.WriteLine();
+            return correctAmountOfRoutes;
         }
 
-        private void createHelperTable(Automata<string> ndfa, ref Table helperTable)
+        //Fills toState string with correct TOSTATE, returns true or false whether or not this new TOSTATE should be a final state
+        private bool GenerateToState(ref string toState, string[] states, char symbol, Automata<string> ndfa)
         {
-            SortedSet<string> reachableStates = new SortedSet<string>();
+            //boolean that will save whether this new TOSTATE needs to be a finalstate
+            bool isFinalState = false;
+            //Set of all the substates that need to be combined. this set does also include all states reached through epsilon routes
+            SortedSet<string> newStates = new SortedSet<string>();
 
-            foreach (var state in helperTable.AvailableStates)
+            //Loop through all the substates 
+            foreach (string state in states)
             {
-                foreach (var column in helperTable.Columns)
+                //ndfa transitions for state
+                List<Transition<string>> trans = ndfa.GetTransition(state);
+
+                //This loop goes through all the aforementioned transitions
+                //to see if there are routes with the correct symbol that need to be added to the new TOSTATE
+                foreach (Transition<string> t in trans)
                 {
-                    // search for epsilon closure states
-                    var transitionsSymbol = ndfa.GetTransition(state).Where(item => item.Symbol == column.Symbol).ToList();
-                    var transitionsEpsilon = ndfa.GetTransition(state).Where(item => item.Symbol == EPSILON && item.FromState == state).ToList();
-
-                    var transitions = transitionsSymbol;
-                    transitions.AddRange(transitionsEpsilon);
-
-                    if (transitions != null)
+                    if (t.Symbol == symbol)
                     {
-                        foreach (var transition in transitions)
-                        {
-                            GetReachableStatesByEpsilons(ndfa, transition, ref reachableStates);
+                        RetrieveEpsilonIncludedState(t.ToState, ndfa, ref newStates);
 
-                            if (!column.ReachableStates.ContainsKey(state))
-                            {
-                                column.AddReachableState(state, reachableStates);
-                            }
-                            else
-                            {
-                                column.ReachableStates[state].UnionWith(reachableStates);
-                            }
-                            reachableStates = new SortedSet<string>();
-                        }
+                        //DEPRECATED, does not work if finalstate is reached through epsilon routes
+                        //Check if this state is final, if one of the substates for the new TOSTATE is final, TOSTATE becomes final as a whole.
+                        //if (ndfa.FinalStates.Contains(t.ToState))
+                        //{
+                        //    isFinalState = true;
+                        //}
                     }
                 }
             }
-            Console.WriteLine();
+
+            //combines substates into one string (TOSTATE)
+            foreach (string subState in newStates)
+            {
+                toState += subState + "_";
+                if (ndfa.FinalStates.Contains(subState))
+                    isFinalState = true;
+            }
+            toState = toState.TrimEnd('_');
+            return isFinalState;
         }
 
-        
-
-        private Table createEmptyTable(Automata<string> ndfa)
+        private void ConvertState(string currentState, ref Automata<string> dfa, ref Automata<string> ndfa)
         {
-            Table helpTable = new Table();
-            helpTable.AvailableStates = ndfa.States;
+            //If this state is already completely processed, return to avoid stackoverflow exception
+            if (dfa.GetTransition(currentState).Count == ndfa.Symbols.Count)
+                return;
 
-            var symbols = ndfa.Symbols;
-            symbols.Remove('ɛ'); // remove epsilon from the list of symbols
+            //split given state for comparison
+            string[] states = currentState.Split('_');
 
-            foreach (var symbol in ndfa.Symbols)
+            //Loop through all symbols aka all the necessary routes
+            foreach (char symbol in ndfa.Symbols)
             {
-                helpTable.AddColumn(new TableColumn(symbol));
+                //checks if this symbol already has a route in the new DFA
+                if (CheckExistingRouteForChar(currentState, symbol, dfa))
+                    return;
+
+                int correctAmountOfRoutes = CheckAvailableRoutes(states, symbol, ndfa);
+
+                //the TOSTATE of the to be added implementation
+                string toState = "";
+                if (correctAmountOfRoutes == 0)
+                {
+                    dfa.AddTransition(new Transition<string>(currentState, symbol, "F"));
+                }
+                else
+                {
+                    bool isFinalState = GenerateToState(ref toState, states, symbol, ndfa);
+
+                    dfa.AddTransition(new Transition<string>(currentState, symbol, toState));
+
+                    //Checks if currentState is should be final aswell (could be done better)
+                    if (ndfa.FinalStates.Contains(currentState))
+                    {
+                        dfa.DefineAsFinalState(currentState);
+                    }
+
+                    if (isFinalState)
+                        dfa.DefineAsFinalState(toState);
+
+                    //checks if its not a loop to itself
+                    if (currentState != toState)
+                        ConvertState(toState, ref dfa, ref ndfa);
+                }
             }
-            return helpTable;
+        }
+
+        public Automata<string> Reverse(Automata<string> automaat)
+        {
+            Automata<string> reverseAutomaat = new Automata<string>(automaat.Symbols);
+            foreach (Transition<string> transition in automaat.Transitions)
+            {
+                reverseAutomaat.AddTransition(
+                    new Transition<string>(transition.ToState, transition.Symbol, transition.FromState));
+            }
+            reverseAutomaat.StartStates = automaat.FinalStates;
+            reverseAutomaat.FinalStates = automaat.StartStates;
+            return reverseAutomaat;
+        }
+
+        // The minimize method of the DFA
+        public Automata<string> OptimizeDfa(Automata<string> dfa)
+        {
+            Automata<string> one = Reverse(dfa);
+            Automata<string> two = Convert(one);
+            Automata<string> three = Reverse(two);
+            Automata<string> four = Convert(three);
+
+            //return four;
+            return Convert(Reverse(Convert(Reverse(four))));
         }
     }
 }

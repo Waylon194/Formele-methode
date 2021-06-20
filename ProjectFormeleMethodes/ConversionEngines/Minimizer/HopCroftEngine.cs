@@ -10,6 +10,8 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
     public class HopcroftEngine
     {
         bool equivalencyOccured = false;
+        int maxTries = 30;
+        int currentTries = 0;
 
         public Automata<string> MinimizeDFA(Automata<string> dfaToOptimize)
         {
@@ -128,12 +130,11 @@ namespace ProjectFormeleMethodes.ConversionEngines.Minimizer
                 partitionTable.AddRowsToPartitionTable(pairs.Item1, pairs.Item2.SubType, pairs.Item2.IsStartState, true);
             }
 
-            if (!equivalencyOccured) // this boolean value changes, if no changes have occured, signaling the partition is optimized
+            if (!equivalencyOccured || currentTries == maxTries) // this boolean value changes, if no changes have occured, signaling the partition is optimized
             {
                 return partitionTable;
             }
-
-            partitionTable.SetCorrectDesignatedLetters();
+            currentTries++;
 
             return optimizePartitionTable(partitionTable);
         }

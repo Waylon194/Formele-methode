@@ -15,8 +15,4 @@
     <PackageReference Include="QuikGraph.Graphviz" Version="2.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Visualization\Graphs\" />
-  </ItemGroup>
-
 </Project>
